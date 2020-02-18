@@ -989,6 +989,7 @@ if ($resql)
 
 			$facturestatic->id = $obj->id;
 			$facturestatic->ref = $obj->ref;
+			$facturestatic->ref_client = $obj->ref_client;
 			$facturestatic->type = $obj->type;
             $facturestatic->total_ht = $obj->total_ht;
             $facturestatic->total_tva = $obj->total_vat;
@@ -1061,7 +1062,6 @@ if ($resql)
                 {
                     print $facturestatic->getNomUrl(1, '', 200, 0, '', 0, 1);
                 }
-				print empty($obj->increment) ? '' : ' ('.$obj->increment.')';
 
 				$filename = dol_sanitizeFileName($obj->ref);
 				$filedir = $conf->facture->dir_output.'/'.dol_sanitizeFileName($obj->ref);
@@ -1078,7 +1078,7 @@ if ($resql)
 			// Customer ref
 			if (!empty($arrayfields['f.ref_client']['checked']))
 			{
-				print '<td class="nowrap">';
+				print '<td class="nowrap tdoverflowmax200">';
 				print $obj->ref_client;
 				print '</td>';
 				if (!$i) $totalarray['nbfield']++;

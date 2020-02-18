@@ -554,15 +554,13 @@ if (empty($reshook))
 				if (!$error)
 				{
 					// Creation of Stripe card + update of societe_account
+					// Note that with the new Stripe API, option to create a card is no more available, instead an error message will be returned to
+					// ask to create the crdit card from Stripe backoffice.
 					$card = $stripe->cardStripe($cu, $companypaymentmode, $stripeacc, $servicestatus, 1);
 					if (!$card)
 					{
 						$error++;
 						setEventMessages($stripe->error, $stripe->errors, 'errors');
-					}
-					else
-					{
-						$stripecard = $card->id;
 					}
 				}
 			}
@@ -1876,7 +1874,7 @@ if ($socid && $action == 'create' && $user->rights->societe->creer)
 
 		print '<tr><td>'.$langs->trans("WithdrawMode").'</td><td>';
 		$tblArraychoice = array("FRST" => $langs->trans("FRST"), "RECUR" => $langs->trans("RECUR"));
-		print $form->selectarray("frstrecur", $tblArraychoice, (isset($_POST['frstrecur']) ?GETPOST('frstrecur') : 'FRST'), 0);
+		print $form->selectarray("frstrecur", $tblArraychoice, (GETPOSTISSET('frstrecur') ? GETPOST('frstrecur') : 'FRST'), 0);
 		print '</td></tr>';
 
 		print '</table>';

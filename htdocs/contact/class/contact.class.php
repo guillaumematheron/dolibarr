@@ -72,8 +72,8 @@ class Contact extends CommonObject
 		'entity' =>array('type'=>'integer', 'label'=>'Entity', 'default'=>1, 'enabled'=>1, 'visible'=>0, 'notnull'=>1, 'position'=>30, 'index'=>1),
 		'ref_ext' =>array('type'=>'varchar(255)', 'label'=>'Ref ext', 'enabled'=>1, 'visible'=>0, 'position'=>35),
 		'civility' =>array('type'=>'varchar(6)', 'label'=>'Civility', 'enabled'=>1, 'visible'=>-1, 'position'=>40),
-		'lastname' =>array('type'=>'varchar(50)', 'label'=>'Lastname', 'enabled'=>1, 'visible'=>-1, 'position'=>45),
-		'firstname' =>array('type'=>'varchar(50)', 'label'=>'Firstname', 'enabled'=>1, 'visible'=>-1, 'position'=>50),
+		'lastname' =>array('type'=>'varchar(50)', 'label'=>'Lastname', 'enabled'=>1, 'visible'=>-1, 'position'=>45, 'showoncombobox'=>1),
+		'firstname' =>array('type'=>'varchar(50)', 'label'=>'Firstname', 'enabled'=>1, 'visible'=>-1, 'position'=>50, 'showoncombobox'=>1),
 		'address' =>array('type'=>'varchar(255)', 'label'=>'Address', 'enabled'=>1, 'visible'=>-1, 'position'=>55),
 		'zip' =>array('type'=>'varchar(25)', 'label'=>'Zip', 'enabled'=>1, 'visible'=>-1, 'position'=>60),
 		'town' =>array('type'=>'text', 'label'=>'Town', 'enabled'=>1, 'visible'=>-1, 'position'=>65),
@@ -86,9 +86,9 @@ class Contact extends CommonObject
 		'phone_mobile' =>array('type'=>'varchar(30)', 'label'=>'Phone mobile', 'enabled'=>1, 'visible'=>-1, 'position'=>100),
 		'fax' =>array('type'=>'varchar(30)', 'label'=>'Fax', 'enabled'=>1, 'visible'=>-1, 'position'=>105),
 		'email' =>array('type'=>'varchar(255)', 'label'=>'Email', 'enabled'=>1, 'visible'=>-1, 'position'=>110),
-		'socialnetworks' =>array('type'=>'text', 'label'=>'Socialnetworks', 'enabled'=>1, 'visible'=>-1, 'position'=>115),
+		'socialnetworks' =>array('type'=>'text', 'label'=>'SocialNetworks', 'enabled'=>1, 'visible'=>-1, 'position'=>115),
 		'photo' =>array('type'=>'varchar(255)', 'label'=>'Photo', 'enabled'=>1, 'visible'=>-1, 'position'=>170),
-		'priv' =>array('type'=>'smallint(6)', 'label'=>'Priv', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'position'=>175),
+		'priv' =>array('type'=>'smallint(6)', 'label'=>'Private', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'position'=>175),
 		'no_email' =>array('type'=>'smallint(6)', 'label'=>'No email', 'enabled'=>1, 'visible'=>-1, 'notnull'=>1, 'position'=>180),
 		'fk_user_creat' =>array('type'=>'integer', 'label'=>'UserAuthor', 'enabled'=>1, 'visible'=>-1, 'position'=>185),
 		'fk_user_modif' =>array('type'=>'integer', 'label'=>'UserModif', 'enabled'=>1, 'visible'=>-1, 'position'=>190),
@@ -358,7 +358,7 @@ class Contact extends CommonObject
 
 			if (!$error)
 			{
-                $result = $this->update($this->id, $user, 1, 'add');
+                $result = $this->update($this->id, $user, 1, 'add');	// This include updateRoles(), ...
                 if ($result < 0)
                 {
                     $error++;
@@ -992,19 +992,25 @@ class Contact extends CommonObject
 	}
 
 
+
 	/**
-	 * Set property ->gender from property ->civility_id
+	 * Set the property "gender" of this class, based on the property "civility_id"
+	 * or use property "civility_code" as fallback, when "civility_id" is not available.
 	 *
 	 * @return void
 	 */
 	public function setGenderFromCivility()
 	{
-	    unset($this->gender);
-    	if (in_array($this->civility_id, array('MR'))) {
-    	    $this->gender = 'man';
-    	} elseif (in_array($this->civility_id, array('MME', 'MLE'))) {
-    	    $this->gender = 'woman';
-    	}
+		unset($this->gender);
+
+		if (in_array($this->civility_id, array('MR')) || in_array($this->civility_code, array('MR')))
+		{
+			$this->gender = 'man';
+		}
+		elseif(in_array($this->civility_id, array('MME','MLE')) || in_array($this->civility_code, array('MME','MLE')))
+		{
+			$this->gender = 'woman';
+		}
 	}
 
     // phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
@@ -1270,9 +1276,16 @@ class Contact extends CommonObject
 	{
 		global $conf, $langs, $hookmanager;
 
-		$result = '';
+		$result = ''; $label = '';
 
-        $label = '<u>'.$langs->trans("ShowContact").'</u>';
+		if (!empty($this->photo) && class_exists('Form'))
+		{
+			$label .= '<div class="photointooltip">';
+			$label .= Form::showphoto('contact', $this, 0, 40, 0, '', 'mini', 0); // Important, we must force height so image will have height tags and if image is inside a tooltip, the tooltip manager can calculate height and position correctly the tooltip.
+			$label .= '</div><div style="clear: both;"></div>';
+		}
+
+        $label .= '<u>'.$langs->trans("ShowContact").'</u>';
         $label .= '<br><b>'.$langs->trans("Name").':</b> '.$this->getFullName($langs);
         //if ($this->civility_id) $label.= '<br><b>' . $langs->trans("Civility") . ':</b> '.$this->civility_id;		// TODO Translate cibilty_id code
         if (!empty($this->poste)) $label .= '<br><b>'.$langs->trans("Poste").':</b> '.$this->poste;
@@ -1593,7 +1606,7 @@ class Contact extends CommonObject
 		$sql .= " AND tc.source = 'external' AND tc.active=1";
 		$sql .= " AND sc.entity IN (".getEntity('societe').')';
 
-		dol_syslog(get_class($this)."::".__METHOD__, LOG_DEBUG);
+		dol_syslog(__METHOD__, LOG_DEBUG);
 
 		$this->roles = array();
 		$resql = $this->db->query($sql);
@@ -1630,6 +1643,10 @@ class Contact extends CommonObject
 	{
 		$tab = array();
 
+		if ($element == 'action') {
+			$element = 'agenda';
+		}
+
 		$sql = "SELECT sc.fk_socpeople as id, sc.fk_c_type_contact";
 		$sql .= " FROM ".MAIN_DB_PREFIX."c_type_contact tc";
 		$sql .= ", ".MAIN_DB_PREFIX."societe_contacts sc";
@@ -1638,7 +1655,7 @@ class Contact extends CommonObject
 		$sql .= " AND tc.element='".$element."'";
 		$sql .= " AND tc.active=1";
 
-		dol_syslog(get_class($this)."::".__METHOD__, LOG_DEBUG);
+		dol_syslog(__METHOD__, LOG_DEBUG);
 		$resql = $this->db->query($sql);
 		if ($resql)
 		{
@@ -1678,7 +1695,7 @@ class Contact extends CommonObject
 
 		$sql = "DELETE FROM ".MAIN_DB_PREFIX."societe_contacts WHERE fk_soc=".$this->socid." AND fk_socpeople=".$this->id; ;
 
-		dol_syslog(get_class($this)."::".__METHOD__, LOG_DEBUG);
+		dol_syslog(__METHOD__, LOG_DEBUG);
 		$result = $this->db->query($sql);
 		if (!$result) {
 			$this->errors[] = $this->db->lasterror().' sql='.$sql;
@@ -1698,7 +1715,7 @@ class Contact extends CommonObject
 					$sql .= $valRoles." , ";
 					$sql .= $this->id;
 					$sql .= ")";
-					dol_syslog(get_class($this)."::".__METHOD__, LOG_DEBUG);
+					dol_syslog(__METHOD__, LOG_DEBUG);
 
 					$result = $this->db->query($sql);
 					if (!$result)

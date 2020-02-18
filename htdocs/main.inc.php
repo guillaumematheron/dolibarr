@@ -553,7 +553,7 @@ if (!defined('NOLOGIN'))
 		// Validation of login/pass/entity
 		// If ok, the variable login will be returned
 		// If error, we will put error message in session under the name dol_loginmesg
-		if ($test && $goontestloop && GETPOST('actionlogin', 'aZ09') == 'login')
+		if ($test && $goontestloop && (GETPOST('actionlogin', 'aZ09') == 'login' || $dolibarr_main_authentication != 'dolibarr'))
 		{
 			$login = checkLoginPassEntity($usertotest, $passwordtotest, $entitytotest, $authmode);
 			if ($login)
@@ -565,6 +565,7 @@ if (!defined('NOLOGIN'))
 				$dol_tz_string = preg_replace('/,/', '/', $dol_tz_string);
 				$dol_tz_string = preg_replace('/\s/', '_', $dol_tz_string);
 				$dol_dst = 0;
+				// Keep $_POST here. Do not use GETPOSTISSET
 				if (isset($_POST["dst_first"]) && isset($_POST["dst_second"]))
 				{
 					include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
@@ -957,7 +958,7 @@ if (!defined('NOLOGIN'))
 	{
 		// If not active, we refuse the user
 		$langs->load("other");
-		dol_syslog("Authentification ko as login is disabled");
+		dol_syslog("Authentication KO as login is disabled", LOG_NOTICE);
 		accessforbidden($langs->trans("ErrorLoginDisabled"));
 		exit;
 	}
@@ -1391,9 +1392,20 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
 				}
 				else
 				{
-					print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
-					print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.pie.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
-					print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.stack.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
+					print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
+					print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.pie.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
+					print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.stack.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
+					/* Test for jflot 4.2 -> not better than current
+					print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.canvaswrapper.js"></script>'."\n";
+					print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.colorhelpers.js"></script>'."\n";
+					print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.js"></script>'."\n";
+					print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.pie.js"></script>'."\n";
+					print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.stack.js"></script>'."\n";
+					print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.saturated.js"></script>'."\n";
+					print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.browser.js"></script>'."\n";
+					print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.drawSeries.js"></script>'."\n";
+					print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/flot/jquery.flot.uiConstants.js"></script>'."\n";
+					*/
 				}
 			}
 			// jQuery jeditable
@@ -1703,13 +1715,8 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 			if ($helpbaseurl && $helppage)
 			{
 				$text = '';
-	            if (!empty($conf->global->MAIN_SHOWDATABASENAMEINHELPPAGESLINK)) {
-                    $langs->load('admin');
-                    $appli .= '<br>'.$langs->trans("Database").': '.$db->database_name;
-                }
-				$title = $appli.'<br>';
-				$title .= $langs->trans($mode == 'wiki' ? 'GoToWikiHelpPage' : 'GoToHelpPage');
-				if ($mode == 'wiki') $title .= ' - '.$langs->trans("PageWiki").' &quot;'.dol_escape_htmltag(strtr($helppage, '_', ' ')).'&quot;';
+				$title = $langs->trans($mode == 'wiki' ? 'GoToWikiHelpPage' : 'GoToHelpPage');
+				if ($mode == 'wiki') $title .= ' - '.$langs->trans("PageWiki").' &quot;'.dol_escape_htmltag(strtr($helppage, '_', ' ')).'&quot;'."";
 				$text .= '<a class="help" target="_blank" rel="noopener" href="';
 				if ($mode == 'wiki') $text .= sprintf($helpbaseurl, urlencode(html_entity_decode($helppage)));
 				else $text .= sprintf($helpbaseurl, $helppage);
@@ -1718,6 +1725,14 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 				$text .= '</a>';
 				$toprightmenu .= @Form::textwithtooltip('', $title, 2, 1, $text, 'login_block_elem', 2);
 			}
+
+			// Version
+			if (!empty($conf->global->MAIN_SHOWDATABASENAMEINHELPPAGESLINK)) {
+				$langs->load('admin');
+				$appli .= '<br>'.$langs->trans("Database").': '.$db->database_name;
+			}
+			$text = '<span href="#" class="aversion"><span class="hideonsmartphone small">'.DOL_VERSION.'</span></span>';
+			$toprightmenu .= @Form::textwithtooltip('', $appli, 2, 1, $text, 'login_block_elem', 2);
 		}
 
 
@@ -2553,72 +2568,80 @@ if (!function_exists("llxFooter"))
 
 		// Add code for the asynchronous anonymous first ping (for telemetry)
 		// You can use &forceping=1 in parameters to force the ping if the ping was already sent.
-		if (($_SERVER["PHP_SELF"] == DOL_URL_ROOT.'/index.php') || GETPOST('forceping', 'alpha'))
+		$forceping = GETPOST('forceping', 'alpha');
+		if (($_SERVER["PHP_SELF"] == DOL_URL_ROOT.'/index.php') || $forceping)
 		{
 			//print '<!-- instance_unique_id='.$conf->file->instance_unique_id.' MAIN_FIRST_PING_OK_ID='.$conf->global->MAIN_FIRST_PING_OK_ID.' -->';
 			$hash_unique_id = md5('dolibarr'.$conf->file->instance_unique_id);
 			if (empty($conf->global->MAIN_FIRST_PING_OK_DATE)
 				|| (!empty($conf->file->instance_unique_id) && ($hash_unique_id != $conf->global->MAIN_FIRST_PING_OK_ID) && ($conf->global->MAIN_FIRST_PING_OK_ID != 'disabled'))
-			|| GETPOST('forceping', 'alpha'))
+			|| $forceping)
 			{
-				if (strpos('alpha', DOL_VERSION) > 0) {
+				// No ping done if we are into an alpha version
+				if (strpos('alpha', DOL_VERSION) > 0 && ! $forceping) {
 					print "\n<!-- NO JS CODE TO ENABLE the anonymous Ping. It is an alpha version -->\n";
 				}
-				elseif (empty($_COOKIE['DOLINSTALLNOPING_'.$hash_unique_id]))	// Cookie is set when we uncheck the checkbox in the installation wizard.
+				elseif (empty($_COOKIE['DOLINSTALLNOPING_'.$hash_unique_id]) || $forceping)	// Cookie is set when we uncheck the checkbox in the installation wizard.
 				{
-					include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+					// MAIN_LAST_PING_KO_DATE
+					// Disable ping if MAIN_LAST_PING_KO_DATE is set and is recent
+					if (! empty($conf->global->MAIN_LAST_PING_KO_DATE) && substr($conf->global->MAIN_LAST_PING_KO_DATE, 0, 6) == dol_print_date(dol_now(), '%Y%m') && ! $forceping) {
+						print "\n<!-- NO JS CODE TO ENABLE the anonymous Ping. An error already occured this month, we will try later. -->\n";
+					} else {
+						include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 
-					print "\n".'<!-- Includes JS for Ping of Dolibarr MAIN_FIRST_PING_OK_DATE = '.$conf->global->MAIN_FIRST_PING_OK_DATE.' MAIN_FIRST_PING_OK_ID = '.$conf->global->MAIN_FIRST_PING_OK_ID.' -->'."\n";
-					print "\n<!-- JS CODE TO ENABLE the anonymous Ping -->\n";
-					$url_for_ping = (empty($conf->global->MAIN_URL_FOR_PING) ? "https://ping.dolibarr.org/" : $conf->global->MAIN_URL_FOR_PING);
-					// Try to guess the distrib used
-					$distrib = 'standard';
-					if ($_SERVER["SERVER_ADMIN"] == 'doliwamp@localhost') $distrib = 'doliwamp';
-					if (! empty($dolibarr_distrib)) $distrib = $dolibarr_distrib;
-					?>
-		    			<script>
-		    			jQuery(document).ready(function (tmp) {
-		    				$.ajax({
-		    					  method: "POST",
-		    					  url: "<?php echo $url_for_ping ?>",
-		    					  timeout: 500,     // timeout milliseconds
-		    					  cache: false,
-		    					  data: {
-			    					  hash_algo: "md5",
-			    					  hash_unique_id: "<?php echo dol_escape_js($hash_unique_id); ?>",
-			    					  action: "dolibarrping",
-			    					  version: "<?php echo (float) DOL_VERSION; ?>",
-			    					  entity: "<?php echo (int) $conf->entity; ?>",
-			    					  dbtype: "<?php echo dol_escape_js($db->type); ?>",
-			    					  country_code: "<?php echo dol_escape_js($mysoc->country_code); ?>",
-			    					  php_version: "<?php echo phpversion(); ?>",
-			    					  os_version: "<?php echo version_os('smr'); ?>",
-			    					  distrib: "<?php echo $distrib ? $distrib : 'unknown'; ?>"
-			    				  },
-		    					  success: function (data, status, xhr) {   // success callback function (data contains body of response)
-		      					    	console.log("Ping ok");
-		        	    				$.ajax({
-		      	    					  method: "GET",
-		      	    					  url: "<?php echo DOL_URL_ROOT.'/core/ajax/pingresult.php'; ?>",
-		      	    					  timeout: 500,     // timeout milliseconds
-		      	    					  cache: false,
-		      	        				  data: { hash_algo: "md5", hash_unique_id: "<?php echo dol_escape_js($hash_unique_id); ?>", action: "firstpingok" },	// to update
-		    					  		});
-		    					  },
-		    					  error: function (data,status,xhr) {   // error callback function
-		        					    console.log("Ping ko: " + data);
-		        	    				$.ajax({
-		        	    					  method: "GET",
-		        	    					  url: "<?php echo DOL_URL_ROOT.'/core/ajax/pingresult.php'; ?>",
-		        	    					  timeout: 500,     // timeout milliseconds
-		        	    					  cache: false,
-		        	        				  data: { hash_algo: "md5", hash_unique_id: "<?php echo dol_escape_js($hash_unique_id); ?>", action: "firstpingko" },
-		      					  		});
-		    					  }
-		    				});
-		    			});
-		    			</script>
-					<?php
+						print "\n".'<!-- Includes JS for Ping of Dolibarr forceping='.$forceping.' MAIN_FIRST_PING_OK_DATE='.$conf->global->MAIN_FIRST_PING_OK_DATE.' MAIN_FIRST_PING_OK_ID='.$conf->global->MAIN_FIRST_PING_OK_ID.' MAIN_LAST_PING_KO_DATE='.$conf->global->MAIN_LAST_PING_KO_DATE.' -->'."\n";
+						print "\n<!-- JS CODE TO ENABLE the anonymous Ping -->\n";
+						$url_for_ping = (empty($conf->global->MAIN_URL_FOR_PING) ? "https://ping.dolibarr.org/" : $conf->global->MAIN_URL_FOR_PING);
+						// Try to guess the distrib used
+						$distrib = 'standard';
+						if ($_SERVER["SERVER_ADMIN"] == 'doliwamp@localhost') $distrib = 'doliwamp';
+						if (! empty($dolibarr_distrib)) $distrib = $dolibarr_distrib;
+						?>
+			    			<script>
+			    			jQuery(document).ready(function (tmp) {
+			    				$.ajax({
+			    					  method: "POST",
+			    					  url: "<?php echo $url_for_ping ?>",
+			    					  timeout: 500,     // timeout milliseconds
+			    					  cache: false,
+			    					  data: {
+				    					  hash_algo: "md5",
+				    					  hash_unique_id: "<?php echo dol_escape_js($hash_unique_id); ?>",
+				    					  action: "dolibarrping",
+				    					  version: "<?php echo (float) DOL_VERSION; ?>",
+				    					  entity: "<?php echo (int) $conf->entity; ?>",
+				    					  dbtype: "<?php echo dol_escape_js($db->type); ?>",
+				    					  country_code: "<?php echo dol_escape_js($mysoc->country_code); ?>",
+				    					  php_version: "<?php echo phpversion(); ?>",
+				    					  os_version: "<?php echo version_os('smr'); ?>",
+				    					  distrib: "<?php echo $distrib ? $distrib : 'unknown'; ?>"
+				    				  },
+			    					  success: function (data, status, xhr) {   // success callback function (data contains body of response)
+			      					    	console.log("Ping ok");
+			        	    				$.ajax({
+			      	    					  method: "GET",
+			      	    					  url: "<?php echo DOL_URL_ROOT.'/core/ajax/pingresult.php'; ?>",
+			      	    					  timeout: 500,     // timeout milliseconds
+			      	    					  cache: false,
+			      	        				  data: { hash_algo: "md5", hash_unique_id: "<?php echo dol_escape_js($hash_unique_id); ?>", action: "firstpingok" },	// to update
+			    					  		});
+			    					  },
+			    					  error: function (data,status,xhr) {   // error callback function
+			        					    console.log("Ping ko: " + data);
+			        	    				$.ajax({
+			        	    					  method: "GET",
+			        	    					  url: "<?php echo DOL_URL_ROOT.'/core/ajax/pingresult.php'; ?>",
+			        	    					  timeout: 500,     // timeout milliseconds
+			        	    					  cache: false,
+			        	        				  data: { hash_algo: "md5", hash_unique_id: "<?php echo dol_escape_js($hash_unique_id); ?>", action: "firstpingko" },
+			      					  		});
+			    					  }
+			    				});
+			    			});
+			    			</script>
+						<?php
+					}
 				}
 				else
 				{
