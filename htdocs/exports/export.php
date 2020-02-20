@@ -33,7 +33,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/modules/export/modules_export.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 // Load translation files required by the page
-$langs->loadlangs(array('admin', 'exports', 'other', 'users', 'companies', 'projects', 'suppliers', 'products', 'bank'));
+$langs->loadlangs(array('admin', 'exports', 'other', 'users', 'companies', 'projects', 'suppliers', 'products', 'bank', 'bills'));
 
 // Everybody should be able to go on this page
 //if (! $user->admin)
@@ -411,7 +411,7 @@ if ($step == 4 && $action == 'submitFormField')
 			$newcode = (string) preg_replace('/\./', '_', $code);
 			//print 'xxx'.$code."=".$newcode."=".$type."=".$_POST[$newcode]."\n<br>";
 			$filterqualified = 1;
-			if (! GETPOSTISSET($newcode) || GETPOST($newcode, 'restricthtml') == '') $filterqualified = 0;
+			if (!GETPOSTISSET($newcode) || GETPOST($newcode, 'restricthtml') == '') $filterqualified = 0;
 			elseif (preg_match('/^List/', $type) && (is_numeric(GETPOST($newcode, 'restricthtml')) && GETPOST($newcode, 'restricthtml') <= 0)) $filterqualified = 0;
 			if ($filterqualified)
 			{

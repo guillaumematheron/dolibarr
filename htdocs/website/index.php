@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2016-2018 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2016-2020 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -398,7 +398,9 @@ if ($action == 'addsite')
 	{
 		$tmpobject = new Website($db);
 		$tmpobject->ref = GETPOST('WEBSITE_REF', 'alpha');
-		$tmpobject->description = GETPOST('WEBSITE_DESCRIPTION', 'alpha');
+		$tmpobject->description = GETPOST('WEBSITE_DESCRIPTION', 'alphanohtml');
+		$tmpobject->lang = GETPOST('WEBSITE_LANG', 'aZ09');
+		$tmpobject->otherlang = GETPOST('WEBSITE_OTHERLANG', 'aZ09comma');
 		$tmpobject->virtualhost = GETPOST('virtualhost', 'alpha');
 
 		$result = $tmpobject->create($user);
@@ -777,14 +779,15 @@ if ($action == 'addcontainer')
 	}
 	else
 	{
-		$objectpage->title = GETPOST('WEBSITE_TITLE', 'alpha');
-		$objectpage->type_container = GETPOST('WEBSITE_TYPE_CONTAINER', 'alpha');
+		$objectpage->title = GETPOST('WEBSITE_TITLE', 'alphanohtml');
+		$objectpage->type_container = GETPOST('WEBSITE_TYPE_CONTAINER', 'aZ09');
 		$objectpage->pageurl = GETPOST('WEBSITE_PAGENAME', 'alpha');
-		$objectpage->aliasalt = GETPOST('WEBSITE_ALIASALT', 'alpha');
-		$objectpage->description = GETPOST('WEBSITE_DESCRIPTION', 'alpha');
-		$objectpage->image = GETPOST('WEBSITE_IMAGE', 'alpha');
-		$objectpage->keywords = GETPOST('WEBSITE_KEYWORDS', 'alpha');
+		$objectpage->aliasalt = GETPOST('WEBSITE_ALIASALT', 'alphanohtml');
+		$objectpage->description = GETPOST('WEBSITE_DESCRIPTION', 'alphanohtml');
 		$objectpage->lang = GETPOST('WEBSITE_LANG', 'aZ09');
+		$objectpage->otherlang = GETPOST('WEBSITE_OTHERLANG', 'aZ09comma');
+		$objectpage->image = GETPOST('WEBSITE_IMAGE', 'alpha');
+		$objectpage->keywords = GETPOST('WEBSITE_KEYWORDS', 'alphanohtml');
 		$objectpage->htmlheader = GETPOST('htmlheader', 'none');
 
 		$substitutionarray = array();
@@ -1060,6 +1063,8 @@ if ($action == 'updatecss')
     		if (!$error)
     		{
     		    $object->virtualhost = GETPOST('virtualhost', 'alpha');
+    		    $object->lang = GETPOST('WEBSITE_LANG', 'aZ09');
+    		    $object->otherlang = GETPOST('WEBSITE_OTHERLANG', 'aZ09comma');
     		    $object->use_manifest = GETPOST('use_manifest', 'alpha');
 
     		    $result = $object->update($user);
@@ -1403,14 +1408,15 @@ if ($action == 'updatemeta')
 	{
 		$objectpage->old_object = clone $objectpage;
 
-		$objectpage->title = GETPOST('WEBSITE_TITLE', 'alpha');
-		$objectpage->type_container = GETPOST('WEBSITE_TYPE_CONTAINER', 'alpha');
+		$objectpage->title = GETPOST('WEBSITE_TITLE', 'alphanohtml');
+		$objectpage->type_container = GETPOST('WEBSITE_TYPE_CONTAINER', 'alphanohtml');
 		$objectpage->pageurl = GETPOST('WEBSITE_PAGENAME', 'alpha');
 		$objectpage->aliasalt = GETPOST('WEBSITE_ALIASALT', 'alpha');
-		$objectpage->description = GETPOST('WEBSITE_DESCRIPTION', 'alpha');
-		$objectpage->image = GETPOST('WEBSITE_IMAGE', 'alpha');
-		$objectpage->keywords = GETPOST('WEBSITE_KEYWORDS', 'alpha');
 		$objectpage->lang = GETPOST('WEBSITE_LANG', 'aZ09');
+		$objectpage->otherlang = GETPOST('WEBSITE_OTHERLANG', 'aZ09comma');
+		$objectpage->description = GETPOST('WEBSITE_DESCRIPTION', 'alphanohtml');
+		$objectpage->image = GETPOST('WEBSITE_IMAGE', 'alpha');
+		$objectpage->keywords = GETPOST('WEBSITE_KEYWORDS', 'alphanohtml');
 		$objectpage->htmlheader = trim(GETPOST('htmlheader', 'none'));
 		$objectpage->fk_page = (GETPOST('pageidfortranslation', 'int') > 0 ? GETPOST('pageidfortranslation', 'int') : 0);
 
@@ -2691,6 +2697,24 @@ if ($action == 'editcss')
 	print $websitekey;
 	print '</td></tr>';
 
+	// Main language
+	print '<tr><td class="tdtop">';
+	$htmltext='';
+	print $form->textwithpicto($langs->trans('MainLanguage'), $htmltext, 1, 'help', '', 0, 2, 'WEBSITE_LANG');
+	print '</td><td>';
+	print $formadmin->select_language((GETPOSTISSET('WEBSITE_LANG') ? GETPOST('WEBSITE_LANG', 'aZ09comma') : ($object->lang ? $object->lang : '0')), 'WEBSITE_LANG', 0, null, 1, 0, 0, 'minwidth300', 2);
+	print '</td>';
+	print '</tr>';
+
+	// Other languages
+	print '<tr><td class="tdtop">';
+	$htmltext=  '';
+	print $form->textwithpicto($langs->trans('OtherLanguages'), $htmltext, 1, 'help', '', 0, 2, 'WEBSITE_OTHERLANG');
+	print '</td><td>';
+	print '<input type="text" class="flat" value="'.(GETPOSTISSET('WEBSITE_OTHERLANG') ? GETPOST('WEBSITE_OTHERLANG', 'alpha') : $object->otherlang).'" name="WEBSITE_OTHERLANG">';
+	print '</td>';
+	print '</tr>';
+
 	// VirtualHost
 	print '<tr><td class="tdtop">';
 
@@ -2816,8 +2840,11 @@ if ($action == 'createsite')
 
 	print '<table class="border centpercent">';
 
+	$siteref = $sitedesc = $sitelang = $siteotherlang = '';
 	if (GETPOST('WEBSITE_REF'))         $siteref = GETPOST('WEBSITE_REF', 'alpha');
 	if (GETPOST('WEBSITE_DESCRIPTION')) $sitedesc = GETPOST('WEBSITE_DESCRIPTION', 'alpha');
+	if (GETPOST('WEBSITE_LANG'))        $sitelang = GETPOST('WEBSITE_LANG', 'aZ09');
+	if (GETPOST('WEBSITE_OTHERLANG'))   $siteotherlang = GETPOST('WEBSITE_OTHERLANG', 'aZ09comma');
 
 	print '<tr><td class="titlefieldcreate fieldrequired">';
 	print $langs->trans('Ref');
@@ -2828,7 +2855,19 @@ if ($action == 'createsite')
 	print '<tr><td>';
 	print $langs->trans('Description');
 	print '</td><td>';
-	print '<input type="text" class="flat minwidth300" name="WEBSITE_DESCRIPTION" value="'.dol_escape_htmltag($sitedesc).'">';
+	print '<input type="text" class="flat minwidth500" name="WEBSITE_DESCRIPTION" value="'.dol_escape_htmltag($sitedesc).'">';
+	print '</td></tr>';
+
+	print '<tr><td>';
+	print $langs->trans('MainLanguage');
+	print '</td><td>';
+	print $formadmin->select_language((GETPOSTISSET('WEBSITE_LANG') ? GETPOST('WEBSITE_LANG', 'aZ09comma') : '0'), 'WEBSITE_LANG', 0, null, 1, 0, 0, 'minwidth300', 2);
+	print '</td></tr>';
+
+	print '<tr><td>';
+	print $langs->trans('OtherLanguages');
+	print '</td><td>';
+	print '<input type="text" class="flat minwidth300" name="WEBSITE_OTHERLANG" value="'.dol_escape_htmltag($siteotherlang).'">';
 	print '</td></tr>';
 
 	print '<tr><td>';
@@ -3057,7 +3096,25 @@ if ($action == 'editmeta' || $action == 'createcontainer')
 	print '<tr><td>';
 	print $langs->trans('Language');
 	print '</td><td>';
-	print $formadmin->select_language($pagelang ? $pagelang : $langs->defaultlang, 'WEBSITE_LANG', 0, null, '1', 0, 0, 'minwidth200');
+	$onlykeys = array();
+	if ($object->lang) $onlykeys[$object->lang] = $object->lang;
+	else $onlykeys[$langs->defaultlang] = $langs->defaultlang;
+	if ($object->otherlang) {
+		$tmparray = explode(',', $object->otherlang);
+		foreach($tmparray as $key) {
+			$tmpkey = trim($key);
+			if (strlen($key) == 2) {
+				$tmpkey = strtolower($key).'_'.strtoupper($tmpkey);
+			}
+			$onlykeys[$tmpkey] = $tmpkey;
+		}
+	}
+	if (empty($object->lang) && empty($object->otherlang)) {
+		$onlykeys = null;	// We keep full list of languages
+	}
+	print $formadmin->select_language($pagelang ? $pagelang : '', 'WEBSITE_LANG', 0, null, '1', 0, 0, 'minwidth200', 0, 0, 0, $onlykeys);
+	$htmltext = $langs->trans("AvailableLanguagesAreDefinedIntoWebsiteProperties");
+	print $form->textwithpicto('', $htmltext);
 	print '</td></tr>';
 
 	// Translation of
