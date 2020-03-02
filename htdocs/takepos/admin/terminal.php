@@ -88,6 +88,8 @@ if (GETPOST('action', 'alpha') == 'set')
     $res = dolibarr_set_const($db, "TAKEPOS_TEMPLATE_TO_USE_FOR_INVOICES".$terminaltouse, GETPOST('TAKEPOS_TEMPLATE_TO_USE_FOR_INVOICES'.$terminaltouse, 'alpha'), 'chaine', 0, '', $conf->entity);
     $res = dolibarr_set_const($db, "TAKEPOS_TEMPLATE_TO_USE_FOR_ORDERS".$terminaltouse, GETPOST('TAKEPOS_TEMPLATE_TO_USE_FOR_ORDERS'.$terminaltouse, 'alpha'), 'chaine', 0, '', $conf->entity);
 
+	$res = dolibarr_set_const($db, 'CASHDESK_READER_KEYCODE_FOR_ENTER'.$terminaltouse, (GETPOST('CASHDESK_READER_KEYCODE_FOR_ENTER'.$terminaltouse, 'int') > 0 ? GETPOST('CASHDESK_READER_KEYCODE_FOR_ENTER'.$terminaltouse, 'int') : ''), 'chaine', 0, '', $conf->entity);
+
 	dol_syslog("admin/cashdesk: level ".GETPOST('level', 'alpha'));
 
 	if (!$res > 0) $error++;
@@ -179,7 +181,7 @@ if (!empty($conf->stock->enabled))
 {
 	print '<tr class="oddeven"><td>'.$langs->trans("CashDeskDoNotDecreaseStock").'</td>'; // Force warehouse (this is not a default value)
 	print '<td>';
-	if (empty($conf->productbatch->enabled)) {
+	if (empty($conf->productbatch->enabled) || !empty($conf->global->CASHDESK_FORCE_DECREASE_STOCK)) {
 	    print $form->selectyesno('CASHDESK_NO_DECREASE_STOCK'.$terminal, $conf->global->{'CASHDESK_NO_DECREASE_STOCK'.$terminal}, 1);
 	}
 	else
@@ -207,9 +209,16 @@ if (!empty($conf->stock->enabled))
 		print '<span class="opacitymedium">'.$langs->trans("StockDecreaseForPointOfSaleDisabled").'</span>';
 	}
 	print '</td></tr>';
+
+	if (!empty($conf->productbatch->enabled) && !empty($conf->global->CASHDESK_FORCE_DECREASE_STOCK) && !$conf->global->{'CASHDESK_NO_DECREASE_STOCK'.$terminal}) {
+		print '<tr class="oddeven"><td>' . $langs->trans('CashDeskForceDecreaseStockLabel') . '</td>';
+		print '<td>';
+		print '<span class="opacitymedium">' . $langs->trans('CashDeskForceDecreaseStockDesc') . '</span>';
+		print '</td></tr>';
+	}
 }
 
-if ($conf->receiptprinter->enabled) {
+if ($conf->global->TAKEPOS_PRINT_METHOD == "receiptprinter") {
 	// Select printer to use with terminal
 	require_once DOL_DOCUMENT_ROOT.'/core/class/dolreceiptprinter.class.php';
 	$printer = new dolReceiptPrinter($db);
@@ -236,6 +245,11 @@ if ($conf->receiptprinter->enabled) {
 	print $form->selectarray('TAKEPOS_TEMPLATE_TO_USE_FOR_ORDERS'.$terminal, $templates, (empty($conf->global->{'TAKEPOS_TEMPLATE_TO_USE_FOR_ORDERS'.$terminal}) ? '0' : $conf->global->{'TAKEPOS_TEMPLATE_TO_USE_FOR_ORDERS'.$terminal}), 1);
 	print '</td></tr>';
 }
+
+print '<tr class="oddeven"><td>' . $langs->trans('CashDeskReaderKeyCodeForEnter') . '</td>';
+print '<td>';
+print '<input type="text" name="' . 'CASHDESK_READER_KEYCODE_FOR_ENTER'.$terminaltouse . '" value="' . $conf->global->{'CASHDESK_READER_KEYCODE_FOR_ENTER'.$terminaltouse} . '" />';
+print '</td></tr>';
 
 print '</table>';
 print '</div>';

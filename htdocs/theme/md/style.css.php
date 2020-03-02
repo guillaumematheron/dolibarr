@@ -279,6 +279,12 @@ textarea.cke_source:focus
 	box-shadow: none;
 }
 
+th.wrapcolumntitle.liste_titre:not(.maxwidthsearch), td.wrapcolumntitle.liste_titre:not(.maxwidthsearch) {
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 120px;
+    text-overflow: ellipsis;
+}
 .liste_titre input[name=month_date_when], .liste_titre input[name=monthvalid], .liste_titre input[name=search_ordermonth], .liste_titre input[name=search_deliverymonth],
 .liste_titre input[name=search_smonth], .liste_titre input[name=search_month], .liste_titre input[name=search_emonth], .liste_titre input[name=smonth], .liste_titre input[name=month],
 .liste_titre input[name=month_lim], .liste_titre input[name=month_start], .liste_titre input[name=month_end], .liste_titre input[name=month_create],
@@ -465,6 +471,13 @@ select.flat, form.flat select {
 .opacitytransp {
 	opacity: 0;
 }
+.colorwhite {
+	color: #fff;
+}
+.colorblack {
+	color: #000;
+}
+
 select:invalid {
 	color: gray;
 }
@@ -1412,11 +1425,7 @@ body.sidebar-collapse .side-nav-vert, body.sidebar-collapse #id-right {
 	margin-left: 228px;
 }
 body.sidebar-collapse .side-nav, body.sidebar-collapse .login_block {
-<?php if (in_array($conf->browser->layout, array('phone', 'tablet')) && empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?>
-	left: -240px;
-<?php } else { ?>
-	left: -229px;
-<?php } ?>
+	display: none;
 }
 <?php if (empty($conf->global->THEME_DISABLE_STICKY_TOPMENU)) {  ?>
 .side-nav-vert {
@@ -1841,6 +1850,8 @@ ul.tmenu {	/* t r b l */
     margin: 0px 0px 0px 0px;
 	list-style: none;
 	display: table;
+    margin-right: 65px;		/* to keep space for bookmark */
+    padding-left: 5px;
 }
 ul.tmenu li {
 	background: rgb(<?php echo $colorbackhmenu1 ?>);
@@ -2049,13 +2060,7 @@ div.mainmenu.website {
 		$found = 0; $url = '';
 		foreach ($conf->file->dol_document_root as $dirroot)
 		{
-		    if (file_exists($dirroot."/".$val."/img/".$val."_over.png"))
-		    {
-		        $url = dol_buildpath('/'.$val.'/img/'.$val.'_over.png', 1);
-		        $found = 1;
-		        break;
-		    }
-		    elseif (file_exists($dirroot."/".$val."/img/".$val.".png"))    // Retro compatibilité
+		    if (file_exists($dirroot."/".$val."/img/".$val.".png"))
 			{
 			    $url = dol_buildpath('/'.$val.'/img/'.$val.'.png', 1);
 			    $found = 1;
@@ -2073,7 +2078,8 @@ div.mainmenu.website {
 		    }
 		    else
 		    {
-		        print "/* A mainmenu entry was found but img file ".$val.".png not found (check /".$val."/img/".$val.".png), so we use a generic one */\n";
+		    	print "/* A mainmenu entry was found but img file ".$val.".png not found (check /".$val."/img/".$val.".png), so we use a generic one. */\n";
+		    	print "/* Overwrite this definition in your own css with a different content to use your own font awesome icon. */\n";
 		        $url = dol_buildpath($path.'/theme/'.$theme.'/img/menus/generic'.(min($generic, 4))."_over.png", 1);
 		        print "div.mainmenu.".$val." {\n";
 		        print "	background-image: url(".$url.");\n";
@@ -2278,7 +2284,7 @@ div.login_block_other { padding-top: 3px; }
 	float: right;
 	vertical-align: top;
 	padding: 0px 0px 0px 2px !important;
-	height: 16px;
+	height: 18px;
 }
 .login_block_elem_name {
 	margin-top: 1px;
@@ -5998,6 +6004,17 @@ border-top-right-radius: 6px;
 }
 
 
+/* ============================================================================== */
+/* CSS style used for jFlot                                                       */
+/* ============================================================================== */
+
+.dol-xaxis-vertical .flot-x-axis .flot-tick-label.tickLabel {
+    text-orientation: sideways;
+    font-weight: 400;
+    writing-mode: vertical-rl;
+    white-space: nowrap;
+}
+
 
 /* ============================================================================== */
 /* CSS style used for small screen                                                */
@@ -6059,7 +6076,8 @@ border-top-right-radius: 6px;
   		color: #<?php echo $colortextbackhmenu; ?>;
 	}
 	.mainmenuaspan {
-  		font-size: 12px;
+  		font-size: 0.9em;
+  		/* font-weight: 300; */
     }
     .topmenuimage {
     	background-size: 24px auto;
@@ -6162,23 +6180,6 @@ border-top-right-radius: 6px;
 }
 
 
-
-/* This must be at end */
-::-webkit-scrollbar {
-    width: 12px;
-}
-::-webkit-scrollbar-button {
-    background: #aaa;
-}
-::-webkit-scrollbar-track-piece {
-    background: #fff;
-}
-::-webkit-scrollbar-thumb {
-    background: #ddd;
-}​
-
-
-
 <?php
 include dol_buildpath($path.'/theme/'.$theme.'/dropdown.inc.php', 0);
 include dol_buildpath($path.'/theme/'.$theme.'/info-box.inc.php', 0);
@@ -6188,3 +6189,23 @@ include dol_buildpath($path.'/theme/eldy/timeline.inc.php', 0); // actually md u
 if (!empty($conf->global->THEME_CUSTOM_CSS)) print $conf->global->THEME_CUSTOM_CSS;
 
 if (is_object($db)) $db->close();
+?>
+
+/* This must be at end */
+::-webkit-scrollbar {
+	width: 12px;
+}
+::-webkit-scrollbar-button {
+	background: #aaa;
+}
+::-webkit-scrollbar-track-piece {
+	background: #fff;
+}
+::-webkit-scrollbar-thumb {
+	background: #ddd;
+}​
+
+div#topmenu-bookmark-dropdown {
+position: fixed;
+right: 20px;
+}
