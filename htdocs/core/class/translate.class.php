@@ -32,6 +32,7 @@ class Translate
 	public $dir; // Directories that contains /langs subdirectory
 
 	public $defaultlang; // Current language for current user
+	public $shortlang; // Short language for current user
 	public $charset_output = 'UTF-8'; // Codage used by "trans" method outputs
 
 	public $tab_translate = array(); // Array of all translations key=>value
@@ -122,6 +123,7 @@ class Translate
 		}
 
 		$this->defaultlang = $srclang;
+		$this->shortlang = substr($srclang, 0, 2);
 		//print 'this->defaultlang='.$this->defaultlang;
 	}
 
@@ -282,7 +284,7 @@ class Translate
 						 * and split the rest until a line feed.
 						 * This is more efficient than fgets + explode + trim by a factor of ~2.
 						 */
-						while ($line = fscanf($fp, "%[^= ]%*[ =]%[^\n]"))
+						while ($line = fscanf($fp, "%[^= ]%*[ =]%[^\n\r]"))
 						{
 							if (isset($line[1]))
 							{
@@ -306,7 +308,7 @@ class Translate
 									    continue;
 									}
 									else {
-										// Convert some strings: Parse and render carriage returns. Also, change '\\s' int '\s' because transifex sync pull the string '\s' into string '\\s'
+										// Convert some strings: Parse and render carriage returns. Also, change '\\s' into '\s' because transifex sync pull the string '\s' into string '\\s'
 										$this->tab_translate[$key] = str_replace(array('\\n', '\\\\s'), array("\n", '\s'), $value);
 										if ($usecachekey) {
 											$tabtranslatedomain[$key] = $value;
@@ -810,7 +812,7 @@ class Translate
 						'uk'=>'uk_UA',
 						'vi'=>'vi_VN'
 					);
-					if (strtolower($regs[1]) != strtolower($regs[2]) && ! in_array($dir, $arrayofspecialmainlanguages)) continue;
+					if (strtolower($regs[1]) != strtolower($regs[2]) && !in_array($dir, $arrayofspecialmainlanguages)) continue;
 				}
 				// We must keep only languages into MAIN_LANGUAGES_ALLOWED
 				if (!empty($conf->global->MAIN_LANGUAGES_ALLOWED) && !in_array($dir, explode(',', $conf->global->MAIN_LANGUAGES_ALLOWED))) continue;

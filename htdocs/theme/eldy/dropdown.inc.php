@@ -1,5 +1,5 @@
 <?php
-if (! defined('ISLOADEDBYSTEELSHEET')) die('Must be call by steelsheet'); ?>
+if (!defined('ISLOADEDBYSTEELSHEET')) die('Must be call by steelsheet'); ?>
 /* <style type="text/css" > dont remove this line it's an ide hack */
 /*
  * Dropdown of user popup
@@ -164,7 +164,9 @@ button.dropdown-item.global-search-item {
 }
 
 div#topmenu-global-search-dropdown, div#topmenu-bookmark-dropdown {
-    line-height: 46px;
+	<?php if (empty($conf->global->THEME_TOPMENU_DISABLE_IMAGE)) { ?>
+		line-height: 46px;
+	<?php } ?>
 }
 a.top-menu-dropdown-link {
     padding: 8px;
@@ -190,7 +192,7 @@ a.top-menu-dropdown-link {
 
 
 .dropdown-menu .dropdown-header{
-    padding: 5px 10px 10px 10px;
+    padding: 8px 8px 8px 8px;
 }
 
 .dropdown-menu > .user-footer {
@@ -351,7 +353,7 @@ a.top-menu-dropdown-link {
 */
 
 .dropdown-search-input {
-    width: 280px;
+    width: 100%;
     padding: 10px 35px 10px 20px;
 
     background-color: transparent;
@@ -379,4 +381,17 @@ a.top-menu-dropdown-link {
 
 .hidden-search-result{
     display: none !important;
+}
+
+/* smartphone */
+@media only screen and (max-width: 767px)
+{
+	.dropdown-search-input {
+	    width: 100%;
+	}
+
+	.tmenu .dropdown-menu, .login_block .dropdown-menu, .topnav .dropdown-menu {
+	    margin-left: 5px;
+	    right: 0;
+    }
 }

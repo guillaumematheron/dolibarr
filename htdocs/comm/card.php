@@ -5,7 +5,7 @@
  * Copyright (C) 2006      Andre Cianfarani            <acianfa@free.fr>
  * Copyright (C) 2005-2017 Regis Houssin               <regis.houssin@inodbox.com>
  * Copyright (C) 2008      Raphael Bertrand (Resultic) <raphael.bertrand@resultic.fr>
- * Copyright (C) 2010-2014 Juanjo Menent               <jmenent@2byte.es>
+ * Copyright (C) 2010-2020 Juanjo Menent               <jmenent@2byte.es>
  * Copyright (C) 2013      Alexandre Spangaro          <aspangaro@open-dsi.fr>
  * Copyright (C) 2015-2019 Frédéric France             <frederic.france@netlogic.fr>
  * Copyright (C) 2015      Marcos García               <marcosgdf@gmail.com>
@@ -65,11 +65,12 @@ $result = restrictedArea($user, 'societe', $id, '&societe');
 $action = GETPOST('action', 'aZ09');
 $mode = GETPOST("mode");
 
+$limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 $sortfield = GETPOST("sortfield", 'alpha');
 $sortorder = GETPOST("sortorder", 'alpha');
-$page = GETPOST("page", 'int');
+$page = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
 if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
-$offset = $conf->liste_limit * $page;
+$offset = $limit * $page;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 if (!$sortorder) $sortorder = "ASC";
@@ -581,7 +582,7 @@ if ($object->id > 0)
 	$boxstat .= '<table summary="'.dol_escape_htmltag($langs->trans("DolibarrStateBoard")).'" class="border boxtable boxtablenobottom boxtablenotop" width="100%">';
 	$boxstat .= '<tr class="impair"><td colspan="2" class="tdboxstats nohover">';
 
-	if (!empty($conf->propal->enabled))
+	if (!empty($conf->propal->enabled) && $user->rights->propal->lire)
 	{
 		// Box proposals
 		$tmp = $object->getOutstandingProposals();
@@ -599,7 +600,7 @@ if ($object->id > 0)
 		if ($link) $boxstat .= '</a>';
 	}
 
-	if (!empty($conf->commande->enabled))
+	if (!empty($conf->commande->enabled) && $user->rights->commande->lire)
 	{
 		// Box commandes
 		$tmp = $object->getOutstandingOrders();
@@ -617,7 +618,7 @@ if ($object->id > 0)
 		if ($link) $boxstat .= '</a>';
 	}
 
-	if (!empty($conf->facture->enabled))
+	if (!empty($conf->facture->enabled) && $user->rights->facture->lire)
 	{
 		// Box factures
 		$tmp = $object->getOutstandingBills();
@@ -751,7 +752,7 @@ if ($object->id > 0)
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."commande as c";
 		$sql .= " WHERE c.fk_soc = s.rowid ";
 		$sql .= " AND s.rowid = ".$object->id;
-		$sql .= " AND c.entity = ".$conf->entity;
+		$sql .= " AND c.entity IN (".getEntity('commande').')';
 		$sql .= " ORDER BY c.date_commande DESC";
 
 		$resql = $db->query($sql);
@@ -905,7 +906,7 @@ if ($object->id > 0)
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."contrat as c";
 		$sql .= " WHERE c.fk_soc = s.rowid ";
 		$sql .= " AND s.rowid = ".$object->id;
-		$sql .= " AND c.entity = ".$conf->entity;
+		$sql .= " AND c.entity IN (".getEntity('contract').")";
 		$sql .= " ORDER BY c.datec DESC";
 
 		$resql = $db->query($sql);
@@ -975,7 +976,7 @@ if ($object->id > 0)
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."fichinter as f";
 		$sql .= " WHERE f.fk_soc = s.rowid";
 		$sql .= " AND s.rowid = ".$object->id;
-		$sql .= " AND f.entity = ".$conf->entity;
+		$sql .= " AND f.entity IN (".getEntity('intervention').")";
 		$sql .= " ORDER BY f.tms DESC";
 
 		$resql = $db->query($sql);
@@ -1044,7 +1045,7 @@ if ($object->id > 0)
 		$sql .= ', s.nom, s.rowid as socid';
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s,".MAIN_DB_PREFIX."facture_rec as f";
 		$sql .= " WHERE f.fk_soc = s.rowid AND s.rowid = ".$object->id;
-		$sql .= " AND f.entity = ".$conf->entity;
+		$sql .= " AND f.entity IN (".getEntity('invoice').")";
 		$sql .= ' GROUP BY f.rowid, f.titre, f.total, f.tva, f.total_ttc,';
 		$sql .= ' f.date_last_gen, f.datec, f.frequency, f.unit_frequency,';
 		$sql .= ' f.suspended, f.date_when,';

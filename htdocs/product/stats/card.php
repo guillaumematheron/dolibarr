@@ -47,7 +47,7 @@ $search_year   = GETPOST('search_year', 'int');
 $search_categ  = GETPOST('search_categ', 'int');
 
 $error = 0;
-$mesg	= '';
+$mesg = '';
 $graphfiles = array();
 
 $socid = '';
@@ -104,7 +104,10 @@ if (!$id && empty($ref))
         $title = $langs->trans("Statistics");
     }
 
-    print load_fiche_titre($title, $mesg, 'products');
+    $picto = 'product';
+    if ($type == 1) $picto = 'service';
+
+    print load_fiche_titre($title, $mesg, $picto);
 }
 else
 {
@@ -355,6 +358,7 @@ if ($result || empty($id))
 					$px->SetYLabel($graphfiles[$key]['label']);
 					$px->SetMaxValue($px->GetCeilMaxValue() < 0 ? 0 : $px->GetCeilMaxValue());
 					$px->SetMinValue($px->GetFloorMinValue() > 0 ? 0 : $px->GetFloorMinValue());
+					$px->setShowLegend(0);
 					$px->SetWidth($WIDTH);
 					$px->SetHeight($HEIGHT);
 					$px->SetHorizTickIncrement(1);

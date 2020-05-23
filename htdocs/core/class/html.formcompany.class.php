@@ -32,6 +32,10 @@
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 
+
+/**
+ * Class of forms component to manage companies
+ */
 class FormCompany extends Form
 {
 
@@ -249,8 +253,7 @@ class FormCompany extends Form
 							}
 						}
 
-						if ((!empty($selected) && $selected == $obj->rowid)
-						 || (empty($selected) && !empty($conf->global->MAIN_FORCE_DEFAULT_STATE_ID) && $conf->global->MAIN_FORCE_DEFAULT_STATE_ID == $obj->rowid))
+						if (!empty($selected) && $selected == $obj->rowid)
 						{
 							$out .= '<option value="'.$obj->rowid.'" selected>';
 						}
@@ -480,7 +483,7 @@ class FormCompany extends Form
 		if ($resql)
 		{
 			$out .= '<div id="particulier2" class="visible">';
-			$out .= '<select class="flat minwidth200'.($morecss?' '.$morecss:'').'" name="'.$htmlname.'" id="'.$htmlname.'">';
+			$out .= '<select class="flat minwidth200'.($morecss ? ' '.$morecss : '').'" name="'.$htmlname.'" id="'.$htmlname.'">';
 			if ($country_codeid) $out .= '<option value="0">&nbsp;</option>'; // When country_codeid is set, we force to add an empty line because it does not appears from select. When not set, we already get the empty line from select.
 
 			$num = $this->db->num_rows($resql);
@@ -730,6 +733,7 @@ class FormCompany extends Form
 		if (is_object($object) && method_exists($object, 'liste_type_contact'))
 		{
 			$lesTypes = $object->liste_type_contact($source, $sortorder, 0, 1);
+
 			print '<select class="flat valignmiddle'.($morecss ? ' '.$morecss : '').'" name="'.$htmlname.'" id="'.$htmlname.'">';
 			if ($showempty) print '<option value="0"></option>';
 			foreach ($lesTypes as $key=>$value)
@@ -869,8 +873,8 @@ class FormCompany extends Form
         $out = '';
 
         // Execute hook getInputIdProf to complete or replace $out
-        $parameters=array('formlength'=>$formlength, 'selected'=>$preselected, 'idprof'=>$idprof, 'htmlname'=>$htmlname, 'country_code'=>$country_code);
-        $reshook=$hookmanager->executeHooks('getInputIdProf', $parameters);
+        $parameters = array('formlength'=>$formlength, 'selected'=>$preselected, 'idprof'=>$idprof, 'htmlname'=>$htmlname, 'country_code'=>$country_code);
+        $reshook = $hookmanager->executeHooks('getInputIdProf', $parameters);
         if (empty($reshook))
         {
         	$out .= '<input type="text" '.($morecss ? 'class="'.$morecss.'" ' : '').'name="'.$htmlname.'" id="'.$htmlname.'" maxlength="'.$maxlength.'" value="'.$selected.'">';
@@ -960,7 +964,7 @@ class FormCompany extends Form
     			$out .= '<option value="2,3"'.($selected == '2,3' ? ' selected' : '').'>'.$langs->trans('Prospect').'</option>';
     		}
     		$out .= '<option value="4"'.($selected == '4' ? ' selected' : '').'>'.$langs->trans('Supplier').'</option>';
-    		$out .= '<option value="0"'.($selected == '0' ? ' selected' : '').'>'.$langs->trans('Others').'</option>';
+    		$out .= '<option value="0"'.($selected == '0' ? ' selected' : '').'>'.$langs->trans('Other').'</option>';
     	} elseif ($typeinput == 'admin') {
     		if (empty($conf->global->SOCIETE_DISABLE_PROSPECTS) && empty($conf->global->SOCIETE_DISABLE_CUSTOMERS) && empty($conf->global->SOCIETE_DISABLE_PROSPECTSCUSTOMERS)) {
     			$out .= '<option value="3"'.($selected == 3 ? ' selected' : '').'>'.$langs->trans('ProspectCustomer').'</option>';
