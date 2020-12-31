@@ -2,7 +2,6 @@
 ProductId=ID de producto / servicio
 CantBeLessThanMinPrice=El precio de venta no puede ser inferior al mínimo permitido para este producto (%s sin impuestos). Este mensaje también puede aparecer si escribe un descuento demasiado importante.
 ErrorProductBadRefOrLabel=Valor incorrecto para referencia o etiqueta.
-Suppliers=Vendedores
 ProductsAndServicesArea=Área de productos y servicios
 ProductsArea=Área de producto
 SetDefaultBarcodeType=Establecer el tipo de código de barras
@@ -11,6 +10,7 @@ NoMatchFound=No se encontraron coincidencias
 DeleteProduct=Eliminar un producto / servicio
 ExportDataset_produit_1=Productos
 ImportDataset_produit_1=productos
+CustomCode=Customs / Commodity / HS code
 BarCodePrintsheet=Imprimir código de barras
 GlobalVariableUpdaterType0=Datos JSON
 GlobalVariableUpdaterHelp0=Analiza los datos JSON de la URL especificada, VALUE especifica la ubicación del valor relevante,

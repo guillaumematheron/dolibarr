@@ -15,6 +15,7 @@ CancelCP=Anul·lada
 RefuseCP=Rebutjada
 ValidatorCP=Validador
 ListeCP=Llista de dies lliures
+Leave=Fitxa de dies lliures
 LeaveId=Identificador de baixa
 ReviewedByCP=Serà revisada per
 UserID=ID d'usuari
@@ -104,7 +105,7 @@ LEAVE_OTHER=Altres sortides
 LEAVE_PAID_FR=Vacances pagades
 ## Configuration du Module ##
 LastUpdateCP=Última actualització automàtica de reserva de dies lliures
-MonthOfLastMonthlyUpdate=Mes de la última actualització automàtica de reserva de dies lliures
+MonthOfLastMonthlyUpdate=Mes de l'última actualització automàtica de reserva de dies lliures
 UpdateConfCPOK=Actualització efectuada correctament.
 Module27130Name= Gestió de dies lliures
 Module27130Desc= Gestió de dies lliures

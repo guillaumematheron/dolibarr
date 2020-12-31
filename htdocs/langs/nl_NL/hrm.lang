@@ -11,8 +11,9 @@ CloseEtablishment=Sluit bedrijf
 # Dictionary
 DictionaryPublicHolidays=HRM - Feestdagen
 DictionaryDepartment=HRM - Afdelingslijst
-DictionaryFunction=HRM - Functielijst
+DictionaryFunction=HRM - Functies
 # Module
 Employees=Werknemers
 Employee=Werknemer
 NewEmployee=Nieuwe werknemer
+ListOfEmployees=List of employees
