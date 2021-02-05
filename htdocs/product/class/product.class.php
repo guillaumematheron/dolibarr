@@ -4334,6 +4334,7 @@ class Product extends CommonObject
 	public function getFather()
 	{
 		$sql = "SELECT p.rowid, p.label as label, p.ref as ref, pa.fk_product_pere as id, p.fk_product_type, pa.qty, pa.incdec, p.entity";
+		$sql .= ", p.tosell as status, p.tobuy as status_buy";
 		$sql .= " FROM ".MAIN_DB_PREFIX."product_association as pa,";
 		$sql .= " ".MAIN_DB_PREFIX."product as p";
 		$sql .= " WHERE p.rowid = pa.fk_product_pere";
@@ -4342,8 +4343,7 @@ class Product extends CommonObject
 		$res = $this->db->query($sql);
 		if ($res) {
 			$prods = array();
-			while ($record = $this->db->fetch_array($res))
-			{
+			while ($record = $this->db->fetch_array($res)) {
 				// $record['id'] = $record['rowid'] = id of father
 				$prods[$record['id']]['id'] = $record['rowid'];
 				$prods[$record['id']]['ref'] = $record['ref'];
@@ -4352,6 +4352,8 @@ class Product extends CommonObject
 				$prods[$record['id']]['incdec'] = $record['incdec'];
 				$prods[$record['id']]['fk_product_type'] = $record['fk_product_type'];
 				$prods[$record['id']]['entity'] = $record['entity'];
+				$prods[$record['id']]['status'] = $record['status'];
+				$prods[$record['id']]['status_buy'] = $record['status_buy'];
 			}
 			return $prods;
 		} else {
@@ -5428,7 +5430,6 @@ class Product extends CommonObject
 		$langs->load('products');
 
 		$label_type = 'label';
-
 		if ($type == 'short') {
 			$label_type = 'short_label';
 		}
@@ -5504,38 +5505,9 @@ class Product extends CommonObject
 	 */
 	public function setCategories($categories)
 	{
-		// Handle single category
-		if (!is_array($categories)) {
-			$categories = array($categories);
-		}
 
-		// Get current categories
-		include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
-		$c = new Categorie($this->db);
-		$existing = $c->containing($this->id, Categorie::TYPE_PRODUCT, 'id');
-
-		// Diff
-		if (is_array($existing)) {
-			$to_del = array_diff($existing, $categories);
-			$to_add = array_diff($categories, $existing);
-		} else {
-			$to_del = array(); // Nothing to delete
-			$to_add = $categories;
-		}
-
-		// Process
-		foreach ($to_del as $del) {
-			if ($c->fetch($del) > 0) {
-				$c->del_type($this, Categorie::TYPE_PRODUCT);
-			}
-		}
-		foreach ($to_add as $add) {
-			if ($c->fetch($add) > 0) {
-				$c->add_type($this, Categorie::TYPE_PRODUCT);
-			}
-		}
-
-		return;
+		require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+		return parent::setCategoriesCommon($categories, Categorie::TYPE_PRODUCT);
 	}
 
 	/**

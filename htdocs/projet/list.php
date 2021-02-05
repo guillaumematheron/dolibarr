@@ -218,6 +218,7 @@ if (empty($reshook))
 	$objectlabel = 'Project';
 	$permissiontoread = $user->rights->projet->lire;
 	$permissiontodelete = $user->rights->projet->supprimer;
+	$permissiontoadd = $user->rights->projet->creer;
 	$uploaddir = $conf->projet->dir_output;
 	include DOL_DOCUMENT_ROOT.'/core/actions_massactions.inc.php';
 
@@ -455,7 +456,8 @@ $arrayofmassactions = array(
 //if($user->rights->societe->creer) $arrayofmassactions['createbills']=$langs->trans("CreateInvoiceForThisCustomer");
 if ($user->rights->projet->creer) $arrayofmassactions['close'] = $langs->trans("Close");
 if ($user->rights->projet->supprimer) $arrayofmassactions['predelete'] = '<span class="fa fa-trash paddingrightonly"></span>'.$langs->trans("Delete");
-if (in_array($massaction, array('presend', 'predelete'))) $arrayofmassactions = array();
+if ($user->rights->projet->creer) $arrayofmassactions['preaffecttag'] = '<span class="fa fa-tag paddingrightonly"></span>'.$langs->trans("AffectTag");
+if (in_array($massaction, array('presend', 'predelete', 'preaffecttag'))) $arrayofmassactions = array();
 
 $massactionbutton = $form->selectMassAction('', $arrayofmassactions);
 
@@ -764,8 +766,7 @@ while ($i < min($num, $limit))
 		if (!empty($arrayfields['s.nom']['checked']))
 		{
 			print '<td class="tdoverflowmax100">';
-			if ($obj->socid)
-			{
+			if ($obj->socid) {
 				print $socstatic->getNomUrl(1);
 			} else {
 				print '&nbsp;';
@@ -774,24 +775,20 @@ while ($i < min($num, $limit))
 			if (!$i) $totalarray['nbfield']++;
 		}
 		// Sales Representatives
-		if (!empty($arrayfields['commercial']['checked']))
-		{
+		if (!empty($arrayfields['commercial']['checked'])) {
 			print '<td>';
-			if ($obj->socid)
-			{
+			if ($obj->socid) {
 				$socstatic->id = $obj->socid;
 				$socstatic->name = $obj->name;
 				$listsalesrepresentatives = $socstatic->getSalesRepresentatives($user);
 				$nbofsalesrepresentative = count($listsalesrepresentatives);
-				if ($nbofsalesrepresentative > 3)   // We print only number
-				{
+				if ($nbofsalesrepresentative > 6) {
+					// We print only number
 					print $nbofsalesrepresentative;
-				} elseif ($nbofsalesrepresentative > 0)
-				{
+				} elseif ($nbofsalesrepresentative > 0) {
 					$userstatic = new User($db);
 					$j = 0;
-					foreach ($listsalesrepresentatives as $val)
-					{
+					foreach ($listsalesrepresentatives as $val) {
 						$userstatic->id = $val['id'];
 						$userstatic->lastname = $val['lastname'];
 						$userstatic->firstname = $val['firstname'];
@@ -799,10 +796,15 @@ while ($i < min($num, $limit))
 						$userstatic->statut = $val['statut'];
 						$userstatic->entity = $val['entity'];
 						$userstatic->photo = $val['photo'];
-						print $userstatic->getNomUrl(1, '', 0, 0, 12);
-						//print $userstatic->getNomUrl(-2);
+						$userstatic->login = $val['login'];
+						$userstatic->phone = $val['phone'];
+						$userstatic->job = $val['job'];
+						$userstatic->gender = $val['gender'];
+						print ($nbofsalesrepresentative < 3) ? $userstatic->getNomUrl(-1, '', 0, 0, 12) : $userstatic->getNomUrl(-2);
 						$j++;
-						if ($j < $nbofsalesrepresentative) print ' ';
+						if ($j < $nbofsalesrepresentative) {
+							print ' ';
+						}
 					}
 				}
 				//else print $langs->trans("NoSalesRepresentativeAffected");

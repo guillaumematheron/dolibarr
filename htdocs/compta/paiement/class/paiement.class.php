@@ -192,6 +192,7 @@ class Paiement extends CommonObject
 				$this->amount         = $obj->amount;
 				$this->multicurrency_amount = $obj->multicurrency_amount;
 				$this->note           = $obj->note;
+				$this->note_private   = $obj->note;
 				$this->type_label = $obj->type_label;
 				$this->type_code      = $obj->type_code;
 				$this->statut         = $obj->statut;
@@ -294,7 +295,7 @@ class Paiement extends CommonObject
 
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX."paiement (entity, ref, ref_ext, datec, datep, amount, multicurrency_amount, fk_paiement, num_paiement, note, ext_payment_id, ext_payment_site, fk_user_creat, pos_change)";
 		$sql .= " VALUES (".$conf->entity.", '".$this->db->escape($this->ref)."', '".$this->db->escape($this->ref_ext)."', '".$this->db->idate($now)."', '".$this->db->idate($this->datepaye)."', ".$total.", ".$mtotal.", ".$this->paiementid.", ";
-		$sql .= "'".$this->db->escape($num_payment)."', '".$this->db->escape($note)."', ".($this->ext_payment_id ? "'".$this->db->escape($this->ext_payment_id)."'" : "null").", ".($this->ext_payment_site ? "'".$this->db->escape($this->ext_payment_site)."'" : "null").", ".$user->id.", ".((int) $this->pos_change).")";
+		$sql .= "'".$this->db->escape($num_payment)."', '".$this->db->escape($note)."', ".($this->ext_payment_id ? "'".$this->db->escape($this->ext_payment_id)."'" : "null").", ".($this->ext_payment_site ? "'".$this->db->escape($this->ext_payment_site)."'" : "null").", ".$user->id.", ".((float) $this->pos_change).")";
 
 		$resql = $this->db->query($sql);
 		if ($resql)
@@ -401,6 +402,7 @@ class Paiement extends CommonObject
 									if ($result < 0)
 									{
 										$this->error = $invoice->error;
+										$this->errors = $invoice->errors;
 										$error++;
 									}
 								}
@@ -578,9 +580,10 @@ class Paiement extends CommonObject
 	 *      @param  string	$emetteur_nom       Name of transmitter
 	 *      @param  string	$emetteur_banque    Name of bank
 	 *      @param	int		$notrigger			No trigger
+	 *  	@param	string	$accountancycode	When we record a free bank entry, we must provide accounting account if accountancy module is on.
 	 *      @return int                 		<0 if KO, bank_line_id if OK
 	 */
-	public function addPaymentToBank($user, $mode, $label, $accountid, $emetteur_nom, $emetteur_banque, $notrigger = 0)
+	public function addPaymentToBank($user, $mode, $label, $accountid, $emetteur_nom, $emetteur_banque, $notrigger = 0, $accountancycode = '')
 	{
 		global $conf, $langs, $user;
 
@@ -625,7 +628,8 @@ class Paiement extends CommonObject
 				'',
 				$user,
 				$emetteur_nom,
-				$emetteur_banque
+				$emetteur_banque,
+				$accountancycode
 			);
 
 			// Mise a jour fk_bank dans llx_paiement

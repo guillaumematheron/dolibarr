@@ -167,6 +167,7 @@ var pageactions=0;
 var place="<?php echo $place; ?>";
 var editaction="qty";
 var editnumber="";
+var invoiceid=0;
 
 /*
 var app = this;
@@ -474,7 +475,7 @@ function Floors() {
 
 function FreeZone() {
 	console.log("Open box to enter a free product");
-	$.colorbox({href:"freezone.php?action=freezone&place="+place, onClosed: function () { Refresh(); },width:"80%", height:"200px", transition:"none", iframe:"true", title:"<?php echo $langs->trans("FreeZone"); ?>"});
+	$.colorbox({href:"freezone.php?action=freezone&place="+place, width:"80%", height:"200px", transition:"none", iframe:"true", title:"<?php echo $langs->trans("FreeZone"); ?>"});
 }
 
 function TakeposOrderNotes() {
@@ -483,8 +484,8 @@ function TakeposOrderNotes() {
 }
 
 function Refresh() {
-	console.log("Refresh by reloading place="+place);
-	$("#poslines").load("invoice.php?place="+place, function() {
+	console.log("Refresh by reloading place="+place+" invoiceid="+invoiceid);
+	$("#poslines").load("invoice.php?place="+place+"&invoiceid="+invoiceid, function() {
 		//$('#poslines').scrollTop($('#poslines')[0].scrollHeight);
 	});
 }
@@ -775,11 +776,10 @@ $( document ).ready(function() {
 	{
 		print "ModalBox('ModalTerminal');";
 	}
-	if ($conf->global->TAKEPOS_CONTROL_CASH_OPENING)
-	{
-		$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."pos_cash_fence WHERE ";
-		$sql .= "date(date_creation) = CURDATE() ";
-		$sql .= "";
+	if ($conf->global->TAKEPOS_CONTROL_CASH_OPENING) {
+	    $sql = "SELECT rowid, status FROM ".MAIN_DB_PREFIX."pos_cash_fence WHERE";
+	    $sql .= " entity = ".$conf->entity." AND ";
+	    $sql .= " date_creation > '".$db->idate(dol_get_first_hour(dol_now()))."'";
 		$resql = $db->query($sql);
 		if ($resql) {
 			$obj = $db->fetch_object($resql);
@@ -1025,8 +1025,9 @@ if ($conf->global->TAKEPOS_PRINT_METHOD == "receiptprinter") {
 	);
 }
 
-$sql = "SELECT rowid, status FROM ".MAIN_DB_PREFIX."pos_cash_fence WHERE ";
-$sql .= "date(date_creation) = CURDATE() ";
+$sql = "SELECT rowid, status, entity FROM ".MAIN_DB_PREFIX."pos_cash_fence WHERE";
+$sql .= " entity = ".$conf->entity." AND ";
+$sql .= " date_creation > '".$db->idate(dol_get_first_hour(dol_now()))."'";
 $resql = $db->query($sql);
 if ($resql)
 {
