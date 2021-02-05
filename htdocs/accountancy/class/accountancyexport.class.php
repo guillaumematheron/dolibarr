@@ -886,7 +886,7 @@ class AccountancyExport
 				print $line->doc_ref . $separator;
 
 				// FEC:PieceDate
-				print dol_string_unaccent($date_creation) . $separator;
+				print $date_document . $separator;
 
 				// FEC:EcritureLib
 				print dol_string_unaccent($line->label_operation) . $separator;
