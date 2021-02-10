@@ -16,6 +16,7 @@
  * Copyright (C) 2018-2020  Frédéric France             <frederic.france@netlogic.fr>
  * Copyright (C) 2019       Thibault Foucart            <support@ptibogxiv.net>
  * Copyright (C) 2020       Open-Dsi         			<support@open-dsi.fr>
+ * Copyright (C) 2021       Gauthier VERDOL         <gauthier.verdol@atm-consulting.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1771,7 +1772,7 @@ function dol_banner_tab($object, $paramid, $morehtml = '', $shownav = 1, $fieldi
 		} else {
 			$morehtmlstatus .= '<span class="statusrefbuy">'.$object->getLibStatut(6, 1).'</span>';
 		}
-	} elseif (in_array($object->element, array('facture', 'invoice', 'invoice_supplier', 'chargesociales', 'loan'))) {
+	} elseif (in_array($object->element, array('facture', 'invoice', 'invoice_supplier', 'chargesociales', 'loan', 'tva'))) {
 		$tmptxt = $object->getLibStatut(6, $object->totalpaye);
 		if (empty($tmptxt) || $tmptxt == $object->getLibStatut(3)) $tmptxt = $object->getLibStatut(5, $object->totalpaye);
 		$morehtmlstatus .= $tmptxt;
@@ -3267,7 +3268,7 @@ function img_picto($titlealt, $picto, $moreatt = '', $pictoisfullpath = false, $
 				'filter', 'file-code', 'file-export', 'file-import', 'file-upload', 'folder', 'folder-open', 'globe', 'globe-americas', 'grip', 'grip_title', 'group',
 				'help', 'holiday',
 				'intervention', 'label', 'language', 'link', 'list', 'listlight', 'loan', 'lot',
-				'map-marker-alt', 'member', 'money-bill-alt', 'mrp', 'note', 'next',
+				'margin', 'map-marker-alt', 'member', 'money-bill-alt', 'mrp', 'note', 'next',
 				'object_accounting', 'object_account', 'object_accountline', 'object_action', 'object_barcode', 'object_bill', 'object_billa', 'object_billd', 'object_bom',
 				'object_category', 'object_conversation', 'object_bookmark', 'object_bug', 'object_clock', 'object_dolly', 'object_dollyrevert', 'object_generic', 'object_folder',
 				'object_list-alt', 'object_calendar', 'object_calendarweek', 'object_calendarmonth', 'object_calendarday', 'object_calendarperuser',
@@ -3363,8 +3364,12 @@ function img_picto($titlealt, $picto, $moreatt = '', $pictoisfullpath = false, $
 			} else {
 				$fakey = 'fa-'.$pictowithouttext;
 			}
-			if (in_array($pictowithouttext, array('payment', 'loan'))) {
-				$fasize = '0.85em';
+
+			if (in_array($pictowithouttext, array('member', 'contract'))) {
+				$fasize = '0.92em';
+			}
+			if (in_array($pictowithouttext, array('intervention', 'payment', 'loan'))) {
+				$fasize = '0.80em';
 			}
 
 			// Define $marginleftonlyshort
@@ -4104,21 +4109,21 @@ function dol_print_error($db = '', $error = '', $errors = null)
 
 		$out .= "<b>".$langs->trans("Date").":</b> ".dol_print_date(time(), 'dayhourlog')."<br>\n";
 		$out .= "<b>".$langs->trans("Dolibarr").":</b> ".DOL_VERSION." - https://www.dolibarr.org<br>\n";
-		if (isset($conf->global->MAIN_FEATURES_LEVEL)) $out .= "<b>".$langs->trans("LevelOfFeature").":</b> ".$conf->global->MAIN_FEATURES_LEVEL."<br>\n";
+		if (isset($conf->global->MAIN_FEATURES_LEVEL)) $out .= "<b>".$langs->trans("LevelOfFeature").":</b> ".dol_htmlentities($conf->global->MAIN_FEATURES_LEVEL, ENT_COMPAT)."<br>\n";
 		if (function_exists("phpversion"))
 		{
 			$out .= "<b>".$langs->trans("PHP").":</b> ".phpversion()."<br>\n";
 		}
-		$out .= "<b>".$langs->trans("Server").":</b> ".dol_htmlentities($_SERVER["SERVER_SOFTWARE"])."<br>\n";
+		$out .= "<b>".$langs->trans("Server").":</b> ".(isset($_SERVER["SERVER_SOFTWARE"]) ? dol_htmlentities($_SERVER["SERVER_SOFTWARE"], ENT_COMPAT) : '')."<br>\n";
 		if (function_exists("php_uname"))
 		{
 			$out .= "<b>".$langs->trans("OS").":</b> ".php_uname()."<br>\n";
 		}
-		$out .= "<b>".$langs->trans("UserAgent").":</b> ".dol_htmlentities($_SERVER["HTTP_USER_AGENT"], ENT_COMPAT, 'UTF-8')."<br>\n";
+		$out .= "<b>".$langs->trans("UserAgent").":</b> ".(isset($_SERVER["HTTP_USER_AGENT"]) ? dol_htmlentities($_SERVER["HTTP_USER_AGENT"], ENT_COMPAT) : '')."<br>\n";
 		$out .= "<br>\n";
-		$out .= "<b>".$langs->trans("RequestedUrl").":</b> ".dol_htmlentities($_SERVER["REQUEST_URI"], ENT_COMPAT, 'UTF-8')."<br>\n";
-		$out .= "<b>".$langs->trans("Referer").":</b> ".(isset($_SERVER["HTTP_REFERER"]) ? dol_htmlentities($_SERVER["HTTP_REFERER"], ENT_COMPAT, 'UTF-8') : '')."<br>\n";
-		$out .= "<b>".$langs->trans("MenuManager").":</b> ".(isset($conf->standard_menu) ? dol_htmlentities($conf->standard_menu) : '')."<br>\n";
+		$out .= "<b>".$langs->trans("RequestedUrl").":</b> ".dol_htmlentities($_SERVER["REQUEST_URI"], ENT_COMPAT)."<br>\n";
+		$out .= "<b>".$langs->trans("Referer").":</b> ".(isset($_SERVER["HTTP_REFERER"]) ? dol_htmlentities($_SERVER["HTTP_REFERER"], ENT_COMPAT) : '')."<br>\n";
+		$out .= "<b>".$langs->trans("MenuManager").":</b> ".(isset($conf->standard_menu) ? dol_htmlentities($conf->standard_menu, ENT_COMPAT) : '')."<br>\n";
 		$out .= "<br>\n";
 		$syslog .= "url=".dol_escape_htmltag($_SERVER["REQUEST_URI"]);
 		$syslog .= ", query_string=".dol_escape_htmltag($_SERVER["QUERY_STRING"]);
@@ -4504,7 +4509,7 @@ function print_barre_liste($titre, $page, $file, $options = '', $sortfield = '',
 	//print 'totalnboflines='.$totalnboflines.'-savlimit='.$savlimit.'-limit='.$limit.'-num='.$num.'-nextpage='.$nextpage;
 
 	print "\n";
-	print "<!-- Begin title '".$titre."' -->\n";
+	print "<!-- Begin title -->\n";
 	print '<table class="centpercent notopnoleftnoright table-fiche-title'.($morecss ? ' '.$morecss : '').'"><tr>'; // maring bottom must be same than into load_fiche_tire
 
 	// Left

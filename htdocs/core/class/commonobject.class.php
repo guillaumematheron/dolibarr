@@ -357,6 +357,13 @@ abstract class CommonObject
 
 	/**
 	 * @var string
+	 * @deprecated
+	 * @see model_pdf
+	 */
+	public $modelpdf;
+
+	/**
+	 * @var string
 	 * Contains relative path of last generated main file
 	 */
 	public $last_main_doc;
@@ -963,7 +970,7 @@ abstract class CommonObject
 	 *  @param 	int|string	$type_contact 		Type of contact (code or id). Must be id or code found into table llx_c_type_contact. For example: SALESREPFOLL
 	 *  @param  string		$source             external=Contact extern (llx_socpeople), internal=Contact intern (llx_user)
 	 *  @param  int			$notrigger			Disable all triggers
-	 *  @return int         	        		<0 if KO, >0 if OK
+	 *  @return int         	        		<0 if KO, 0 if already added, >0 if OK
 	 */
 	public function add_contact($fk_socpeople, $type_contact, $source = 'external', $notrigger = 0)
 	{
@@ -1068,7 +1075,9 @@ abstract class CommonObject
 					return -1;
 				}
 			}
-		} else return 0;
+		} else {
+			return 0;
+		}
 	}
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
@@ -2071,6 +2080,7 @@ abstract class CommonObject
 			$fieldname = 'fk_mode_reglement';
 			if ($this->element == 'societe') $fieldname = 'mode_reglement';
 			if (get_class($this) == 'Fournisseur') $fieldname = 'mode_reglement_supplier';
+			if (get_class($this) == 'Tva') $fieldname = 'fk_typepayment';
 
 			$sql = 'UPDATE '.MAIN_DB_PREFIX.$this->table_element;
 			$sql .= ' SET '.$fieldname.' = '.(($id > 0 || $id == '0') ? $id : 'NULL');
@@ -4914,7 +4924,7 @@ abstract class CommonObject
 						    $this->result['filename']=$ecmfile->filename;*/
 							//var_dump($obj->update_main_doc_field);exit;
 
-							// Update the last_main_doc field into main object (if documenent generator has property ->update_main_doc_field set)
+							// Update the last_main_doc field into main object (if document generator has property ->update_main_doc_field set)
 							$update_main_doc_field = 0;
 							if (!empty($obj->update_main_doc_field)) $update_main_doc_field = 1;
 							if ($update_main_doc_field && !empty($this->table_element))
@@ -7169,9 +7179,6 @@ abstract class CommonObject
 									if ($(this).val() == 0){
 								   		$("#"+child_list).hide();
 									}
-
-								$("select[name=\""+parent_list+"\"]").change(function() {
-									showOptions(child_list, parent_list, orig_select[child_list]);
 								});
 							});
 						}
