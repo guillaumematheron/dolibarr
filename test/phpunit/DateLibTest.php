@@ -36,6 +36,10 @@ if (empty($user->id)) {
 }
 $conf->global->MAIN_DISABLE_ALL_MAILS=1;
 
+print "\n".$langs->trans("CurrentTimeZone").' : '.getServerTimeZoneString();
+print "\n".$langs->trans("CurrentHour").' : '.dol_print_date(dol_now('gmt'), 'dayhour', 'tzserver');
+print "\n";
+
 
 /**
  * Class for PHPUnit tests
@@ -68,7 +72,10 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 		$this->savlangs=$langs;
 		$this->savdb=$db;
 
+		$langs->load("admin");
+
 		print __METHOD__." db->type=".$db->type." user->id=".$user->id;
+
 		//print " - db ".$db->db;
 		print "\n";
 	}
@@ -138,8 +145,8 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 		$db=$this->savdb;
 
 		// With same hours
-		$date1=dol_mktime(0, 0, 0, 1, 1, 2012);
-		$date2=dol_mktime(0, 0, 0, 1, 2, 2012);
+		$date1=dol_mktime(0, 0, 0, 1, 1, 2012, 'gmt');
+		$date2=dol_mktime(0, 0, 0, 1, 2, 2012, 'gmt');
 
 		$result=num_between_day($date1, $date2, 1);
 		print __METHOD__." result=".$result."\n";
@@ -150,8 +157,8 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 		$this->assertEquals(1, $result);
 
 		// With different hours
-		$date1=dol_mktime(0, 0, 0, 1, 1, 2012);
-		$date2=dol_mktime(12, 0, 0, 1, 2, 2012);
+		$date1=dol_mktime(0, 0, 0, 1, 1, 2012, 'gmt');
+		$date2=dol_mktime(12, 0, 0, 1, 2, 2012, 'gmt');
 
 		$result=num_between_day($date1, $date2, 1);
 		print __METHOD__." result=".$result."\n";
@@ -190,25 +197,26 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 		$db=$this->savdb;
 
 		// With same hours - Tuesday/Wednesday jan 2013
-		$date1=dol_mktime(0, 0, 0, 1, 1, 2013);
-		$date2=dol_mktime(0, 0, 0, 1, 2, 2013);
-		$date3=dol_mktime(0, 0, 0, 1, 3, 2013);
+		$date1=dol_mktime(0, 0, 0, 1, 1, 2013, 'gmt');
+		$date2=dol_mktime(0, 0, 0, 1, 2, 2013, 'gmt');
+		$date3=dol_mktime(0, 0, 0, 1, 3, 2013, 'gmt');
 
 		$result=num_public_holiday($date1, $date2, 'FR', 1);
-		print __METHOD__." result=".$result."\n";
+		print __METHOD__." for Tuesday 1 - Wednesday 2 jan 2013 for FR result=".$result."\n";
 		$this->assertEquals(1, $result, 'NumPublicHoliday for Tuesday 1 - Wednesday 2 jan 2013 for FR');   // 1 closed days (country france)
 
 		$result=num_public_holiday($date1, $date2, 'XX', 1);
-		print __METHOD__." result=".$result."\n";
+		print __METHOD__." for Tuesday 1 - Wednesday 2 jan 2013 for XX result=".$result."\n";
 		$this->assertEquals(1, $result, 'NumPublicHoliday for Tuesday 1 - Wednesday 2 jan 2013 for XX');   // 1 closed days (country unknown)
 
+		print '----'."\n";
 		$result=num_public_holiday($date2, $date3, 'FR', 1);
-		print __METHOD__." result=".$result."\n";
+		print __METHOD__." for Wednesday 2 - Thursday 3 jan 2013 for FR result=".$result."\n";
 		$this->assertEquals(0, $result, 'NumPublicHoliday for Wednesday 2 - Thursday 3 jan 2013 for FR');   // no closed days
 
 		// Check with easter monday
-		$date1=dol_mktime(0, 0, 0, 4, 21, 2019);
-		$date2=dol_mktime(0, 0, 0, 4, 23, 2019);
+		$date1=dol_mktime(0, 0, 0, 4, 21, 2019, 'gmt');
+		$date2=dol_mktime(0, 0, 0, 4, 23, 2019, 'gmt');
 
 		$result=num_public_holiday($date1, $date2, 'XX', 1);
 		print __METHOD__." result=".$result."\n";
@@ -219,8 +227,8 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 		$this->assertEquals(2, $result, 'NumPublicHoliday including eastermonday for FR');   // 1 opened day, 2 closed days (sunday + easter monday)
 
 		// Check for sunday/saturday - Friday 4 - Sunday 6 jan 2013
-		$date1=dol_mktime(0, 0, 0, 1, 4, 2013);
-		$date2=dol_mktime(0, 0, 0, 1, 6, 2013);
+		$date1=dol_mktime(0, 0, 0, 1, 4, 2013, 'gmt');
+		$date2=dol_mktime(0, 0, 0, 1, 6, 2013, 'gmt');
 
 		$result=num_public_holiday($date1, $date2, 'FR', 1);
 		print __METHOD__." result=".$result."\n";
@@ -257,9 +265,9 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 		$db=$this->savdb;
 
 		// With same hours - Tuesday/Wednesday jan 2013
-		$date1=dol_mktime(0, 0, 0, 1, 1, 2013);
-		$date2=dol_mktime(0, 0, 0, 1, 2, 2013);
-		$date3=dol_mktime(0, 0, 0, 1, 3, 2013);
+		$date1=dol_mktime(0, 0, 0, 1, 1, 2013, 'gmt');
+		$date2=dol_mktime(0, 0, 0, 1, 2, 2013, 'gmt');
+		$date3=dol_mktime(0, 0, 0, 1, 3, 2013, 'gmt');
 
 		$result=num_open_day($date1, $date2, 0, 1, 0, 'FR');
 		print __METHOD__." result=".$result."\n";
@@ -274,8 +282,8 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 		$this->assertEquals(2, $result, 'NumOpenDay Wednesday 2 - Thursday 3 jan 2013 for FR');   // 2 opened days
 
 		// With same hours - Friday/Sunday jan 2013
-		$date1=dol_mktime(0, 0, 0, 1, 4, 2013);
-		$date2=dol_mktime(0, 0, 0, 1, 6, 2013);
+		$date1=dol_mktime(0, 0, 0, 1, 4, 2013, 'gmt');
+		$date2=dol_mktime(0, 0, 0, 1, 6, 2013, 'gmt');
 
 		$result=num_open_day($date1, $date2, 0, 1, 0, 'FR');
 		print __METHOD__." result=".$result."\n";
@@ -325,8 +333,7 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 
 		$result=convertSecondToTime(86400, 'all', 86400);
 		print __METHOD__." result=".$result."\n";
-		$this->assertSame('1 '.$langs->trans("Day"), $result);
-
+		$this->assertSame('1 '.strtolower(dol_substr($langs->trans("Day"), 0, 1).'.'), $result);
 
 		return $result;
 	}
@@ -382,6 +389,17 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 		$result=dol_print_date(0, '%a %b %B', true, $outputlangs);
 		print __METHOD__." result=".$result."\n";
 		$this->assertEquals('Jeu Jan. Janvier', $result);
+
+
+		$result=dol_print_date(1619388000, '%Y-%m-%d %a', 'gmt', $outputlangs);
+		print __METHOD__." result=".$result."\n";
+		$this->assertEquals('2021-04-25 Dim', $result);
+
+		/* This test is disabled because result depends on TZ of server
+		$result=dol_print_date(1619388000, '%Y-%m-%d %a', 'tzserver', $outputlangs);	// If TZ is +2, then result will be Lun for 1619388000
+		print __METHOD__." result=".$result."\n";
+		$this->assertEquals('2021-04-26 Lun', $result);
+		*/
 
 		// Check day format for en_US
 		$outputlangs=new Translate('', $conf);
@@ -484,5 +502,30 @@ class DateLibTest extends PHPUnit\Framework\TestCase
 		$conf->global->MAIN_START_WEEK = 0;	// start on sunday
 		$prev = dol_get_first_day_week($day, $month, $year);
 		$this->assertEquals(1, (int) $prev['first_day']);		// sunday for month 2, year 2015 is the 1st
+
+		return 1;
+	}
+
+
+	/**
+	 * testDolGetFirstHour
+	 *
+	 * @return int
+	 */
+	public function testDolGetFirstHour()
+	{
+		global $conf;
+
+		$now = 1800 + (24 * 3600 * 10);	// The 11th of january 1970 at 0:30 in UTC
+		$result = dol_get_first_hour($now, 'gmt');
+		print __METHOD__." now = ".$now.", dol_print_date(now, 'dayhourrfc', 'gmt') = ".dol_print_date($now, 'dayhourrfc', 'gmt').", result = ".$result.", dol_print_date(result, 'dayhourrfc', 'gmt') = ".dol_print_date($result, 'dayhourrfc', 'gmt')."\n";
+		$this->assertEquals('1970-01-11T00:00:00Z', dol_print_date($result, 'dayhourrfc', 'gmt'));		// monday for month 2, year 2014 is the 2
+
+		$now = 23.5 * 3600 + (24 * 3600 * 10);	// The 11th of january 1970 at 23:30 in UTC
+		$result = dol_get_first_hour($now, 'gmt');
+		print __METHOD__." now = ".$now.", dol_print_date(now, 'dayhourrfc', 'gmt') = ".dol_print_date($now, 'dayhourrfc', 'gmt').", result = ".$result.", dol_print_date(result, 'dayhourrfc', 'gmt') = ".dol_print_date($result, 'dayhourrfc', 'gmt')."\n";
+		$this->assertEquals('1970-01-11T00:00:00Z', dol_print_date($result, 'dayhourrfc', 'gmt'));		// monday for month 2, year 2014 is the 2
+
+		return 1;
 	}
 }

@@ -248,7 +248,7 @@ class ExportTest extends PHPUnit\Framework\TestCase
 	{
 		global $conf,$user,$langs,$db;
 
-		$sql = "SELECT f.ref as f_ref, f.total as f_total, f.tva as f_tva FROM ".MAIN_DB_PREFIX."facture f";
+		$sql = "SELECT f.ref as f_ref, f.total_ht as f_total, f.total_tva as f_tva FROM ".MAIN_DB_PREFIX."facture f";
 
 		$objexport=new Export($db);
 		//$objexport->load_arrays($user,$datatoexport);
@@ -279,14 +279,14 @@ class ExportTest extends PHPUnit\Framework\TestCase
 		$expectedresult=1;
 		$this->assertEquals($expectedresult, $result, 'Error in TSV export');
 
-        $model='excel2007';
+		$model='excel2007';
 
 		// Build export file
 		/* ko on php 7.4 on travis (zip not available) */
 		print "Process build_file for model = ".$model."\n";
 		$result=$objexport->build_file($user, $model, $datatoexport, $array_selected, array(), $sql);
 		$expectedresult=1;
-        $this->assertEquals($expectedresult, $result, 'Error in Excel2007 export');
+		$this->assertEquals($expectedresult, $result, 'Error in Excel2007 export');
 
 		return true;
 	}
@@ -301,18 +301,18 @@ class ExportTest extends PHPUnit\Framework\TestCase
 	{
 		global $conf,$user,$langs,$db;
 		/*
-		$sql = "SELECT f.ref as f_ref, f.total as f_total, f.tva as f_tva FROM ".MAIN_DB_PREFIX."facture f";
+		$sql = "SELECT f.ref as f_ref, f.total_ht as f_total_ht, f.total_tva as f_total_tva FROM ".MAIN_DB_PREFIX."facture f";
 
 		$objexport=new Export($db);
 		//$objexport->load_arrays($user,$datatoexport);
 
 		// Define properties
 		$datatoexport='test_filtered';
-		$array_selected = array("f.ref"=>1, "f.total"=>2, "f.tva"=>3);
-		$array_export_fields = array("f.ref"=>"FacNumber", "f.total"=>"FacTotal", "f.tva"=>"FacVat");
-		$array_filtervalue = array("f.total" => ">100");
-		$array_filtered = array("f.total" => 1);
-		$array_alias = array("f_ref"=>"ref", "f_total"=>"total", "f_tva"=>"tva");
+		$array_selected = array("f.ref"=>1, "f.total_ht"=>2, "f.total_tva"=>3);
+		$array_export_fields = array("f.ref"=>"FacNumber", "f.total_ht"=>"FacTotal", "f.total_tva"=>"FacVat");
+		$array_filtervalue = array("f.total_ht" => ">100");
+		$array_filtered = array("f.total_ht" => 1);
+		$array_alias = array("f_ref"=>"ref", "f_total_ht"=>"total_ht", "f_total_tva"=>"total_tva");
 		$objexport->array_export_fields[0]=$array_export_fields;
 		$objexport->array_export_alias[0]=$array_alias;
 

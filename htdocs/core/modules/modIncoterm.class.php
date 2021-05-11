@@ -22,7 +22,7 @@
  *
  *  \file       htdocs/core/modules/modIncoterm.class.php
  *  \ingroup    incoterm
- *  \brief      Description and activation file for module MyModule
+ *  \brief      Description and activation file for the module MyModule
  */
 include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
 
@@ -56,7 +56,7 @@ class modIncoterm extends DolibarrModules
 		$this->version = 'dolibarr';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
-		$this->picto = 'generic';
+		$this->picto = 'incoterm';
 
 		$this->module_parts = array();
 		$this->dirs = array();
@@ -79,8 +79,7 @@ class modIncoterm extends DolibarrModules
 		$this->tabs = array();
 
 		// Dictionaries
-		if (!isset($conf->incoterm->enabled))
-		{
+		if (!isset($conf->incoterm->enabled)) {
 			$conf->incoterm = new stdClass();
 			$conf->incoterm->enabled = 0;
 		}

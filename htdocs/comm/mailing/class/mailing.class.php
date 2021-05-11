@@ -252,7 +252,7 @@ class Mailing extends CommonObject
 	/**
 	 *  Update emailing record
 	 *
-	 *  @param	User	$user 		Object of user making change
+	 *  @param  User	$user 		Object of user making change
 	 *  @return int				    < 0 if KO, > 0 if OK
 	 */
 	public function update($user)
@@ -427,7 +427,7 @@ class Mailing extends CommonObject
 				$sql .= " source_id ,";
 				$sql .= " source_type";
 				$sql .= " FROM ".MAIN_DB_PREFIX."mailing_cibles";
-				$sql .= " WHERE fk_mailing = ".$fromid;
+				$sql .= " WHERE fk_mailing = ".((int) $fromid);
 
 				$result = $this->db->query($sql);
 				if ($result) {
@@ -499,7 +499,7 @@ class Mailing extends CommonObject
 	public function delete($rowid)
 	{
 		$sql = "DELETE FROM ".MAIN_DB_PREFIX."mailing";
-		$sql .= " WHERE rowid = ".$rowid;
+		$sql .= " WHERE rowid = ".((int) $rowid);
 
 		dol_syslog("Mailing::delete", LOG_DEBUG);
 		$resql = $this->db->query($sql);

@@ -32,25 +32,26 @@ $langs->loadLangs(array('compta', 'bills'));
 $id = GETPOST('id', 'int');
 $action = GETPOST('action', 'aZ09');
 
-// Security check
-$socid = GETPOST('socid', 'int');
-if ($user->socid) $socid = $user->socid;
-$result = restrictedArea($user, 'tax', '', '', 'charges');
-
 $object = new Tva($db);
 
+// Security check
+$socid = GETPOST('socid', 'int');
+if ($user->socid) {
+	$socid = $user->socid;
+}
+$result = restrictedArea($user, 'tax', '', 'tva', 'charges');
 
 
 /*
  * Actions
  */
 
-if ($action == 'setlib' && $user->rights->tax->charges->creer)
-{
+if ($action == 'setlib' && $user->rights->tax->charges->creer) {
 	$object->fetch($id);
 	$result = $object->setValueFrom('label', GETPOST('lib', 'alpha'), '', '', 'text', '', $user, 'TAX_MODIFY');
-	if ($result < 0)
+	if ($result < 0) {
 		setEventMessages($object->error, $object->errors, 'errors');
+	}
 }
 
 

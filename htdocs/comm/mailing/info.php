@@ -33,9 +33,10 @@ $id = GETPOST('id', 'int');
 $langs->load("mails");
 
 // Security check
-if (!$user->rights->mailing->lire || $user->socid > 0) {
+if (!$user->rights->mailing->lire || (empty($conf->global->EXTERNAL_USERS_ARE_AUTHORIZED) && $user->socid > 0)) {
 	accessforbidden();
 }
+//$result = restrictedArea($user, 'mailing');
 
 
 
@@ -76,7 +77,6 @@ if ($object->fetch($id) >= 0) {
 	//print '<table width="100%"><tr><td>';
 	dol_print_object_info($object, 0);
 	//print '</td></tr></table>';
-
 
 	print dol_get_fiche_end();
 }

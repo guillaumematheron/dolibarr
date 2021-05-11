@@ -37,7 +37,7 @@ if (!empty($conf->projet->enabled)) {
 }
 
 // Load translation files required by the page
-$langs->loadLangs(array('companies', 'other', 'bills'));
+$langs->loadLangs(array('companies', 'other', 'bills', 'orders'));
 
 $action		= GETPOST('action', 'aZ09');
 $confirm	= GETPOST('confirm');
@@ -45,8 +45,7 @@ $id			= GETPOST('id', 'int');
 $ref		= GETPOST('ref');
 
 // Security check
-if ($user->socid)
-{
+if ($user->socid) {
 	$socid = $user->socid;
 }
 $result = restrictedArea($user, 'commande', $id, '');
@@ -56,16 +55,26 @@ $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 $sortfield = GETPOST("sortfield", 'alpha');
 $sortorder = GETPOST("sortorder", 'alpha');
 $page = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
-if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
+if (empty($page) || $page == -1) {
+	$page = 0;
+}     // If $page is not defined, or '' or -1
 $offset = $limit * $page;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
-if (!empty($conf->global->MAIN_DOC_SORT_FIELD)) { $sortfield = $conf->global->MAIN_DOC_SORT_FIELD; }
-if (!empty($conf->global->MAIN_DOC_SORT_ORDER)) { $sortorder = $conf->global->MAIN_DOC_SORT_ORDER; }
+if (!empty($conf->global->MAIN_DOC_SORT_FIELD)) {
+	$sortfield = $conf->global->MAIN_DOC_SORT_FIELD;
+}
+if (!empty($conf->global->MAIN_DOC_SORT_ORDER)) {
+	$sortorder = $conf->global->MAIN_DOC_SORT_ORDER;
+}
 
-if (!$sortorder) $sortorder = "ASC";
-if (!$sortfield) $sortfield = "name";
+if (!$sortorder) {
+	$sortorder = "ASC";
+}
+if (!$sortfield) {
+	$sortfield = "name";
+}
 
 $object = new Commande($db);
 
@@ -74,27 +83,25 @@ $object = new Commande($db);
  * Actions
  */
 
-if ($object->fetch($id))
-{
+if ($object->fetch($id)) {
 	$object->fetch_thirdparty();
 	$upload_dir = $conf->commande->multidir_output[$object->entity]."/".dol_sanitizeFileName($object->ref);
 }
 
-include_once DOL_DOCUMENT_ROOT.'/core/actions_linkedfiles.inc.php';
+include DOL_DOCUMENT_ROOT.'/core/actions_linkedfiles.inc.php';
 
 
 /*
  * View
  */
-
-llxHeader('', $langs->trans('Order'), 'EN:Customers_Orders|FR:Commandes_Clients|ES:Pedidos de clientes');
+$title = $langs->trans('Order')." - ".$langs->trans('Documents');
+$help_url = 'EN:Customers_Orders|FR:Commandes_Clients|ES:Pedidos de clientes|DE:Modul_Kundenaufträge';
+llxHeader('', $title, $help_url);
 
 $form = new Form($db);
 
-if ($id > 0 || !empty($ref))
-{
-	if ($object->fetch($id, $ref))
-	{
+if ($id > 0 || !empty($ref)) {
+	if ($object->fetch($id, $ref)) {
 		$object->fetch_thirdparty();
 
 		$upload_dir = $conf->commande->multidir_output[$object->entity].'/'.dol_sanitizeFileName($object->ref);
@@ -105,8 +112,7 @@ if ($id > 0 || !empty($ref))
 		// Build file list
 		$filearray = dol_dir_list($upload_dir, "files", 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ?SORT_DESC:SORT_ASC), 1);
 		$totalsize = 0;
-		foreach ($filearray as $key => $file)
-		{
+		foreach ($filearray as $key => $file) {
 			$totalsize += $file['size'];
 		}
 
@@ -122,12 +128,10 @@ if ($id > 0 || !empty($ref))
 		// Thirdparty
 		$morehtmlref .= '<br>'.$langs->trans('ThirdParty').' : '.$object->thirdparty->getNomUrl(1);
 		// Project
-		if (!empty($conf->projet->enabled))
-		{
+		if (!empty($conf->projet->enabled)) {
 			$langs->load("projects");
 			$morehtmlref .= '<br>'.$langs->trans('Project').' ';
-			if ($user->rights->commande->creer)
-			{
+			if ($user->rights->commande->creer) {
 				if ($action != 'classify') {
 					//$morehtmlref.='<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=classify&amp;id=' . $object->id . '">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a> : ';
 					$morehtmlref .= ' : ';
@@ -181,7 +185,7 @@ if ($id > 0 || !empty($ref))
 		$permission = $user->rights->commande->creer;
 		$permtoedit = $user->rights->commande->creer;
 		$param = '&id='.$object->id.'&entity='.(!empty($object->entity) ? $object->entity : $conf->entity);
-		include_once DOL_DOCUMENT_ROOT.'/core/tpl/document_actions_post_headers.tpl.php';
+		include DOL_DOCUMENT_ROOT.'/core/tpl/document_actions_post_headers.tpl.php';
 	} else {
 		dol_print_error($db);
 	}

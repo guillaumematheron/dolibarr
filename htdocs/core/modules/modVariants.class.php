@@ -24,6 +24,7 @@
  *  \brief      Module to manage product combinations based on product attributes
  *  \file       htdocs/core/modules/modVariants.class.php
  *  \ingroup    produit
+ *  \brief      Description and activation file for the module product variants
  */
 include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
 
@@ -96,8 +97,7 @@ class modVariants extends DolibarrModules
 		);
 
 		// Dictionaries
-		if (!isset($conf->mymodule->enabled))
-		{
+		if (!isset($conf->mymodule->enabled)) {
 			$conf->mymodule = new stdClass();
 			$conf->mymodule->enabled = 0;
 		}

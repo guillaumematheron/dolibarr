@@ -22,7 +22,7 @@
  *
  *  \file       htdocs/core/modules/modAsset.class.php
  *  \ingroup    asset
- *  \brief      Description and activation file for module Assets
+ *  \brief      Description and activation file for the module assets
  */
 include_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
 
@@ -69,7 +69,7 @@ class modAsset extends DolibarrModules
 		// Name of image file used for this module.
 		// If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
 		// If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
-		$this->picto = 'accounting';
+		$this->picto = 'asset';
 
 		// Defined all module parts (triggers, login, substitutions, menus, css, etc...)
 		// for default path (eg: /asset/core/xxxxx) (0=disable, 1=enable)
@@ -79,7 +79,7 @@ class modAsset extends DolibarrModules
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/asset/temp","/asset/subdir");
-		$this->dirs = array();
+		$this->dirs = array("/asset/temp");
 
 		// Config pages. Put here list of php page, stored into asset/admin directory, to use to setup module.
 		$this->config_page_url = array("setup.php@asset");
@@ -105,8 +105,7 @@ class modAsset extends DolibarrModules
 		$this->const = array();
 
 
-		if (!isset($conf->asset) || !isset($conf->asset->enabled))
-		{
+		if (!isset($conf->asset) || !isset($conf->asset->enabled)) {
 			$conf->asset = new stdClass();
 			$conf->asset->enabled = 0;
 		}
