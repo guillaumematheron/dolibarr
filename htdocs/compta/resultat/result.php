@@ -328,6 +328,8 @@ if ($modecompta == 'CREANCES-DETTES') {
 				// Previous Fiscal year (N-1)
 				foreach ($sommes as $code => $det) {
 					$vars[$code] = $det['NP'];
+					if ($vars[$code] == '')
+						$vars[$code] = 0;
 				}
 
 				$result = strtr($formula, $vars);
