@@ -741,9 +741,9 @@ class AccountancyCategory // extends CommonObject
 				if ($listofaccount) {
 					$listofaccount .= ",";
 				}
-				$listofaccount .= "'".$cptcursor."'";
+				$listofaccount .= "'".$this->db->escape($cptcursor)."'";
 			}
-			$sql .= " AND t.numero_compte IN (".$this->db->sanitize($listofaccount).")";
+			$sql .= " AND t.numero_compte IN (".$listofaccount.")";
 		} else {
 			$sql .= " AND t.numero_compte = '".$this->db->escape($cpt)."'";
 		}
